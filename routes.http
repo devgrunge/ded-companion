@@ -3,13 +3,17 @@ POST http://localhost:3333/characters
 Content-Type: application/json
 
 {
-    "name": "Dummie",
+    "name": "newbie",
     "level": "1",
     "class": "Warrior"
 }
 
 ### List characters
 GET http://localhost:3333/characters
+
+### Search usign Quey parameters
+
+GET http://localhost:3333/characters?search=newbie
 
 ### Update Character
 
