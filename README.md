@@ -32,4 +32,3 @@ Content-Type: application/json
 ### Delete Character
 
 DELETE http://localhost:3333/characters/892b2b5d-edaf-4153-aa8a-8307be7020ba
-

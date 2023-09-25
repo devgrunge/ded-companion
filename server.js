@@ -1,35 +1,38 @@
 import { fastify } from "fastify";
-import { DatabaseMemory } from "./databaseMemory.js";
+import { DatabasePostgres } from "./databasePostgres.js";
+import { DatabaseMemory } from "./databaseMemory.js"
 
 const server = fastify();
 
-const database = new DatabaseMemory();
+const database = new DatabasePostgres();
 
-server.post("/characters", (request, reply) => {
+server.post("/characters", async (request, reply) => {
   const body = request.body;
-
-  database.create({
+  
+  await database.create({
     name: body.name,
     level: body.level,
     class: body.class,
   });
-
+  
   console.log(database.list());
-
+  
   return reply.status(201).send();
 });
 
-server.get("/characters", (request, reply) => {
+server.get("/characters", async (request, reply) => {
   const search = request.query.search;
-  const data = database.list(search);
+  const data = await database.list(search);
   return data;
 });
 
-server.put("/characters/:id", (request, reply) => {
+server.put("/characters/:id", async (request, reply) => {
   const characterId = request.params.id;
   const body = request.body;
 
-  database.update(characterId, {
+  console.log("my body ==>",body.class)
+
+  await database.update(characterId, {
     name: body.name,
     level: body.level,
     class: body.class,
