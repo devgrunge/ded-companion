@@ -1,6 +1,6 @@
 import { fastify } from "fastify";
 import { DatabasePostgres } from "./databasePostgres.js";
-import { DatabaseMemory } from "./databaseMemory.js"
+import { DatabaseMemory } from "./databaseMemory.js";
 
 const server = fastify();
 
@@ -8,15 +8,15 @@ const database = new DatabasePostgres();
 
 server.post("/characters", async (request, reply) => {
   const body = request.body;
-  
+
   await database.create({
     name: body.name,
     level: body.level,
     class: body.class,
   });
-  
+
   console.log(database.list());
-  
+
   return reply.status(201).send();
 });
 
@@ -30,7 +30,7 @@ server.put("/characters/:id", async (request, reply) => {
   const characterId = request.params.id;
   const body = request.body;
 
-  console.log("my body ==>",body.class)
+  console.log("my body ==>", body.class);
 
   await database.update(characterId, {
     name: body.name,
@@ -50,5 +50,5 @@ server.delete("/characters/:id", (request, reply) => {
 });
 
 server.listen({
-  port: 3333,
+  port: process.env.PORT ?? 3333,
 });
