@@ -1,34 +1,32 @@
-# ded-companion
-## Here are some examples to use the api, that is WIP
-
 ### Create characters
-POST http://localhost:3333/characters
+POST https://ded-companion.onrender.com/characters
 Content-Type: application/json
 
 {
-    "name": "newbie",
-    "level": "1",
-    "class": "Warrior"
+    "name": "veteran",
+    "level": 3,
+    "class": "warrior"
 }
 
 ### List characters
-GET http://localhost:3333/characters
+GET https://ded-companion.onrender.com/characters
 
 ### Search usign Quey parameters
 
-GET http://localhost:3333/characters?search=newbie
+GET https://ded-companion.onrender.com/characters?search=newbie
 
 ### Update Character
 
-PUT http://localhost:3333/characters/892b2b5d-edaf-4153-aa8a-8307be7020ba
+PUT https://ded-companion.onrender.com/characters/163b51b6-741e-4222-bce7-2b67a1d74f5f
 Content-Type: application/json
 
 {
-  "name": "Not a dummie anymore",
-  "level": 2,
+  "name": "Veteran",
+  "level": 3,
   "class": "Warrior"
 }
 
 ### Delete Character
 
-DELETE http://localhost:3333/characters/892b2b5d-edaf-4153-aa8a-8307be7020ba
+DELETE https://ded-companion.onrender.com/characters/163b51b6-741e-4222-bce7-2b67a1d74f5f
+
