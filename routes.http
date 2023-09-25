@@ -1,5 +1,5 @@
 ### Create characters
-POST http://localhost:3333/characters
+POST https://ded-companion.onrender.com/characters
 Content-Type: application/json
 
 {
@@ -9,15 +9,15 @@ Content-Type: application/json
 }
 
 ### List characters
-GET http://localhost:3333/characters
+GET https://ded-companion.onrender.com/characters
 
 ### Search usign Quey parameters
 
-GET http://localhost:3333/characters?search=newbie
+GET https://ded-companion.onrender.com/characters?search=newbie
 
 ### Update Character
 
-PUT http://localhost:3333/characters/163b51b6-741e-4222-bce7-2b67a1d74f5f
+PUT https://ded-companion.onrender.com/characters/163b51b6-741e-4222-bce7-2b67a1d74f5f
 Content-Type: application/json
 
 {
@@ -28,5 +28,5 @@ Content-Type: application/json
 
 ### Delete Character
 
-DELETE http://localhost:3333/characters/163b51b6-741e-4222-bce7-2b67a1d74f5f
+DELETE https://ded-companion.onrender.com/characters/163b51b6-741e-4222-bce7-2b67a1d74f5f
 
