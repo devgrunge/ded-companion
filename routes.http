@@ -1,11 +1,21 @@
 ### Create characters
-POST https://ded-companion.onrender.com/characters
+POST http://localhost:3333/characters
 Content-Type: application/json
 
 {
     "name": "veteran",
     "level": 3,
-    "class": "warrior"
+    "class": "warrior",
+    "armor_class": 16,
+    "hitpoints": 30,
+    "attributes": {
+       "for": 10,
+       "dex": 12,
+       "con": 14,
+       "int": 16,
+       "wis": 8,
+       "car": 18
+}
 }
 
 ### List characters
@@ -28,5 +38,5 @@ Content-Type: application/json
 
 ### Delete Character
 
-DELETE https://ded-companion.onrender.com/characters/163b51b6-741e-4222-bce7-2b67a1d74f5f
+DELETE https://ded-companion.onrender.com/characters/79e818ab-a105-42bc-9e21-8f4965fe6f40
 

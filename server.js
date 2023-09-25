@@ -13,6 +13,16 @@ server.post("/characters", async (request, reply) => {
     name: body.name,
     level: body.level,
     class: body.class,
+    attributes: {
+      for: body.attributes.for,
+      dex: body.attributes.dex,
+      con: body.attributes.con,
+      int: body.attributes.int,
+      wis: body.attributes.wis,
+      car: body.attributes.car,
+    },
+    hitpoints: body.hitpoints,
+    armor_class: body.armor_class
   });
 
   console.log(database.list());
@@ -29,8 +39,6 @@ server.get("/characters", async (request, reply) => {
 server.put("/characters/:id", async (request, reply) => {
   const characterId = request.params.id;
   const body = request.body;
-
-  console.log("my body ==>", body.class);
 
   await database.update(characterId, {
     name: body.name,
@@ -50,6 +58,6 @@ server.delete("/characters/:id", (request, reply) => {
 });
 
 server.listen({
-  host: '0.0.0.0',
+  host: "0.0.0.0",
   port: process.env.PORT ?? 3333,
 });
