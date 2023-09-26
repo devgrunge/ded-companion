@@ -32,7 +32,7 @@ export class DatabasePostgres {
 
     await sql`update characters set name = ${data.name}, class = ${
       data.class
-    }, level = ${data.level}, class = ${data.class}, attributes = ${sql.json(
+    }, level = ${data.level}, attributes = ${sql.json(
       data.attributes
     )}, armor_class = ${data.armor_class}, hitpoints = ${
       data.hitpoints
