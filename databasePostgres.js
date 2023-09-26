@@ -30,7 +30,13 @@ export class DatabasePostgres {
     console.log("my id ==>", id);
     const data = character;
 
-    await sql`update characters set name = ${data.name}, class = ${data.class}, level = ${data.level} WHERE id = ${id}`;
+    await sql`update characters set name = ${data.name}, class = ${
+      data.class
+    }, level = ${data.level}, class = ${data.class}, attributes = ${sql.json(
+      data.attributes
+    )}, armor_class = ${data.armor_class}, hitpoints = ${
+      data.hitpoints
+    }  WHERE id = ${id}`;
   }
 
   async delete(id) {
