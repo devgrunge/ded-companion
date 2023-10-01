@@ -1,5 +1,6 @@
-import { sql } from "./db.js";
+import { sql } from "../config/db.js";
 import { randomUUID } from "node:crypto";
+import { nanoid } from 'nanoid'
 
 export class DatabasePostgres {
   async list(search) {
@@ -15,19 +16,23 @@ export class DatabasePostgres {
     return characters;
   }
 
-  async create(character) {
-    const characterId = randomUUID();
-    const data = character;
-    console.log("data character ==>", data);
-    await sql`insert into characters (id, name, level , class, attributes , armor_class, hitpoints ) VALUES (${characterId},${
-      data.name
-    }, ${data.level}, ${data.class}, ${sql.json(data.attributes)}, ${
-      data.armor_class
-    }, ${data.hitpoints})`;
+  async create(dataRequest, entityType) {
+    const dataId = randomUUID();
+    const data = dataRequest;
+    if (entityType === "player") {
+      await sql`insert into characters (id, name, level , class, attributes , armor_class, hitpoints ) VALUES (${dataId},${
+        data.name
+      }, ${data.level}, ${data.class}, ${sql.json(data.attributes)}, ${
+        data.armor_class
+      }, ${data.hitpoints})`;
+    } else if (entityType === "room") {
+      await sql`insert into rooms (id, room_name, invite_code) VALUES (${dataId}, ${data.room_name}, ${nanoid(4)})`;
+    } else {
+      throw new Error("Unrecognized entity type");
+    }
   }
 
   async update(id, character) {
-    console.log("my id ==>", id);
     const data = character;
 
     await sql`update characters set name = ${data.name}, class = ${

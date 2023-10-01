@@ -1,5 +1,5 @@
 ### Create characters
-POST http://localhost:3333/characters
+POST https://ded-companion.onrender.com/characters
 Content-Type: application/json
 
 {
@@ -7,7 +7,7 @@ Content-Type: application/json
     "level": 3,
     "class": "warrior",
     "armor_class": 16,
-    "hitpoints": 30,
+    "hitpoints": 20,
     "attributes": {
        "for": 10,
        "dex": 12,
@@ -48,5 +48,12 @@ Content-Type: application/json
 
 ### Delete Character
 
-DELETE https://ded-companion.onrender.com/characters/32dc0d1f-e752-462f-b630-f7709d599bb8
+DELETE https://ded-companion.onrender.com/characters/d05c02e4-5f59-4cbe-b28c-8655608c0138
 
+### Create rooms
+POST https://localhost:3333/rooms
+Content-Type: application/json
+
+{
+    "room_name": "primeira mesa!",
+}
