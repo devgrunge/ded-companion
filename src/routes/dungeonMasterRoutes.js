@@ -2,63 +2,63 @@ import { DatabasePostgres } from "../models/databasePostgres.js";
 
 const database = new DatabasePostgres();
 
-export async function roomRoutes(server) {
-  server.post("/rooms", async (request, reply) => {
+export async function dungeonMasterRoutes(server) {
+  server.post("/dungeon-master", async (request, reply) => {
     const body = request.body;
 
     try {
       await database.create(
         {
-          room_name: body.room_name,
+          dm_name: body.dm_name,
         },
-        "room"
+        "dungeon_master"
       );
       return reply.status(204).send();
     } catch (error) {
-      console.error("Error creating room:", error);
+      console.error("Error creating Dungeon master:", error);
       response.status(500).send("Internal server error");
     }
   });
 
-  server.get("/rooms", async (request, reply) => {
+  server.get("/dungeon-master", async (request, reply) => {
     const search = request.query.search;
     try {
-      const data = await database.list(search, "room");
+      const data = await database.list(search, "dungeon_master");
       return data;
     } catch (error) {
-      console.error("Error listing Room: ", error);
+      console.error(error);
       return reply.status(500).send({ error: "Internal Server Error" });
     }
   });
 
-  server.put("/rooms/:id", async (request, reply) => {
-    const roomId = request.params.id;
+  server.put("/dungeon-master/:id", async (request, reply) => {
+    const dmId = request.params.id;
     const body = request.body;
 
     try {
       await database.update(
-        roomId,
+        dmId,
         {
-          room_name: body.room_name,
+          dm_name: body.dm_name,
         },
-        "room"
+        "dungeon_master"
       );
       return reply.status(204).send();
     } catch (error) {
-      console.error("Error updating Room:", error);
+      console.error("Error updating Dungeon master:", error);
       response.status(400).send("Id does not exist");
     }
   });
 
-  server.delete("/rooms/:id", async (request, reply) => {
-    const roomId = request.params.id;
+  server.delete("/dungeon-master/:id", async (request, reply) => {
+    const dmId = request.params.id;
 
     try {
-      database.delete(roomId, "room");
+      await database.delete(dmId, "dungeon_master");
 
       return reply.status(204).send();
-    } catch (error) {
-      console.error("Error deleting room: ", error);
+    } catch {
+      console.error("Error deleting Dungeon master:", error);
       return reply.status(500).send({ error: "Internal Server Error" });
     }
   });

@@ -57,3 +57,12 @@ Content-Type: application/json
 {
     "room_name": "primeira mesa!",
 }
+
+
+## Create Dungeon master 
+POST https://localhost:3333/dungeon-master
+Content-Type: application/json
+
+{
+    "dm_name": "first dm!",
+}
