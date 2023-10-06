@@ -4,7 +4,6 @@ import { roomRoutes } from "./src/routes/roomRoutes.js";
 import { dungeonMasterRoutes } from "./src/routes/dungeonMasterRoutes.js";
 
 const server = fastify();
-
 // routes registry
 characterRoutes(server);
 roomRoutes(server);

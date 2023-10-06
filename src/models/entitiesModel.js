@@ -2,7 +2,7 @@ import { sql } from "../config/db.js";
 import { randomUUID } from "node:crypto";
 import { nanoid } from "nanoid";
 
-export class DatabasePostgres {
+export class EntityModel {
   async list(search, entityType) {
     let query;
 

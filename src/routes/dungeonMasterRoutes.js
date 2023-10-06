@@ -1,6 +1,6 @@
-import { DatabasePostgres } from "../models/databasePostgres.js";
+import {  EntityModel } from "../models/entitiesModel.js";
 
-const database = new DatabasePostgres();
+const database = new EntityModel();
 
 export async function dungeonMasterRoutes(server) {
   server.post("/dungeon-master", async (request, reply) => {
@@ -57,7 +57,7 @@ export async function dungeonMasterRoutes(server) {
       await database.delete(dmId, "dungeon_master");
 
       return reply.status(204).send();
-    } catch {
+    } catch(error) {
       console.error("Error deleting Dungeon master:", error);
       return reply.status(500).send({ error: "Internal Server Error" });
     }

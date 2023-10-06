@@ -1,6 +1,6 @@
-import { DatabasePostgres } from "../models/databasePostgres.js";
+import {  EntityModel } from "../models/entitiesModel.js";
 
-const database = new DatabasePostgres();
+const database = new EntityModel();
 
 export async function characterRoutes(server) {
   server.post("/characters", async (request, reply) => {
@@ -69,7 +69,7 @@ export async function characterRoutes(server) {
         "player"
       );
       return reply.status(204).send();
-    } catch {
+    } catch (error) {
       console.error("Error updating character: ", error);
       response.status(400).send("Id does not exist");
     }
@@ -79,7 +79,7 @@ export async function characterRoutes(server) {
     const characterId = request.params.id;
     try {
       database.delete(characterId, "player");
-      
+
       return reply.status(204).send();
     } catch (error) {
       console.error("Error deleting character: ", error);
