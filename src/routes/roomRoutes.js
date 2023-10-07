@@ -68,13 +68,19 @@ export async function roomRoutes(server) {
   // Handling relationship between rooms and players
   server.post("/rooms/enter", async (request, reply) => {
     try {
-      const { player_id, room_id } = request.body;
+      const { entity_id, room_id, entity_type } = request.body;
 
-      await inGameDatabase.enterRoom(player_id, room_id);
+      if (entity_type === "player") {
+        await inGameDatabase.enterRoomPlayerRoom(entity_id, room_id);
+      } else if (entity_type === "dungeon_master") {
+        await inGameDatabase.enterRoomDungeonMasterRoom(entity_id, room_id);
+      } else {
+        return reply.status(400).send({ error: "Unrecognized entity type" });
+      }
 
       return reply
         .status(201)
-        .send({ message: "Player has entered the room." });
+        .send({ message: `${entity_type} has entered the room.` });
     } catch (error) {
       console.error("Error at entering this room: ", error);
       return reply.status(500).send({ error: "Internal Server Error" });
@@ -83,36 +89,64 @@ export async function roomRoutes(server) {
 
   server.delete("/rooms/leave", async (request, reply) => {
     try {
-      const { player_id, room_id } = request.body;
+      const { entity_id, room_id, entity_type } = request.body;
 
-      const existingEntry = await inGameDatabase.checkPlayerRoomRelationship(
-        player_id,
-        room_id
-      );
-
-      console.log("existing entry ==>",existingEntry)
-      if (!existingEntry) {
-        return reply.status(400).send({ error: "Player is not in the room." });
+      if (entity_type === "player") {
+        const existingEntry = await inGameDatabase.checkPlayerRoomRelationship(
+          entity_id,
+          room_id
+        );
+        if (!existingEntry) {
+          return reply
+            .status(400)
+            .send({ error: "Player is not in the room." });
+        }
+        await inGameDatabase.leaveRoom(entity_id, room_id);
+      } else if (entity_type === "dungeon_master") {
+        const existingEntry =
+          await inGameDatabase.checkDungeonMasterRoomRelationship(
+            entity_id,
+            room_id
+          );
+        if (!existingEntry) {
+          return reply
+            .status(400)
+            .send({ error: "Player is not in the room." });
+        }
+        await inGameDatabase.dungeonMasterLeaveRoom(entity_id, room_id);
       }
-
       // Remove the player from the room
-      await inGameDatabase.leaveRoom(player_id, room_id);
     } catch (error) {
       console.error("Error at leaving room: ", error);
       return reply.status(500).send({ error: "Internal Server Error" });
     }
   });
 
-  server.get("/rooms/players/:room_id",async (request, reply) =>{
-    try{
+  server.get("/rooms/players/:room_id", async (request, reply) => {
+    try {
       const roomId = request.params.room_id;
 
-      const playersInRoom = await inGameDatabase.getPlayersInRoom(roomId)
+      const playersInRoom = await inGameDatabase.getPlayersInRoom(roomId);
 
       return reply.status(200).send(playersInRoom);
-    }catch(error){
+    } catch (error) {
       console.error("Error fetching players in room: ", error);
-      return reply.status(500).send({ error: "Internal server error" })
+      return reply.status(500).send({ error: "Internal server error" });
     }
-  })
+  });
+
+  server.get("/rooms/dungeon_masters/:room_id", async (request, reply) => {
+    try {
+      const roomId = request.params.room_id;
+
+      const dungeonMastersInRoom = await database.getDungeonMastersInRoom(
+        roomId
+      );
+
+      return reply.status(200).send(dungeonMastersInRoom);
+    } catch (error) {
+      console.error("Error fetching dungeon masters in room: ", error);
+      return reply.status(500).send({ error: "Internal Server Error" });
+    }
+  });
 }
