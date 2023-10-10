@@ -1,4 +1,5 @@
-import {  EntityModel } from "../models/entitiesModel.js";
+import { EntityModel } from "../models/entitiesModel.js";
+import { tokenVerification } from "../services/auth.js";
 
 const database = new EntityModel();
 
@@ -33,16 +34,22 @@ export async function characterRoutes(server) {
     }
   });
 
-  server.get("/characters", async (request, reply) => {
-    const search = request.query.search;
-    try {
-      const data = await database.list(search, "player");
-      return data;
-    } catch (error) {
-      console.error("Error searching character: ", error);
-      return reply.status(500).send({ error: "Internal Server Error" });
+  server.get(
+    "/characters",
+    {
+      tokenVerification,
+    },
+    async (request, reply) => {
+      const search = request.query.search;
+      try {
+        const data = await database.list(search, "player");
+        return data;
+      } catch (error) {
+        console.error("Error searching character: ", error);
+        return reply.status(500).send({ error: "Internal Server Error" });
+      }
     }
-  });
+  );
 
   server.put("/characters/:id", async (request, reply) => {
     const characterId = request.params.id;

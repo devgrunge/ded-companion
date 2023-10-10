@@ -4,7 +4,7 @@ import { InGameModel } from "../models/inGameModel.js";
 const database = new EntityModel();
 const inGameDatabase = new InGameModel();
 
-export async function roomRoutes(server) {
+export const roomRoutes = async(server) => {
   server.post("/rooms", async (request, reply) => {
     const body = request.body;
 
@@ -18,7 +18,7 @@ export async function roomRoutes(server) {
       return reply.status(204).send();
     } catch (error) {
       console.error("Error creating room:", error);
-      response.status(500).send("Internal server error");
+      reply.status(500).send("Internal server error");
     }
   });
 
