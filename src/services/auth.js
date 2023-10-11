@@ -26,29 +26,39 @@ export const authService = async (email, password) => {
       expiresIn: "365d",
     });
 
-    console.log("my token", token);
-
     return token;
   } catch (error) {
     console.error("Error authenticating", error);
     throw error;
   }
 };
-
-export class tokenVerification {
-  validateToken(server) {
-    server.addHook("preHandler", async (request, reply, done) => {
-      const token = request.headers.authorization?.replace(/^Bearer/, "");
-
-      if (!token) {
-        reply.status(401).send("Unauthorized: missing token");
-      }
-      const decodedToken = Jwt.verify(token, appSecret);
-      const user = await database.getUserInfo(decodedToken.email);
-      if (!user) {
-        throw "User not found";
-      }
-      return user;
-    });
+const verifyToken = async (token) => {
+  try {
+    const decodedToken = Jwt.verify(token, appSecret);
+    console.log("my decoded token: ", decodedToken);
+    return decodedToken;
+  } catch (error) {
+    console.error("Invalid token", error);
+    return null;
   }
-}
+};
+
+export const validateToken = async (request, reply, done) => {
+  try {
+    const token = request.headers.authorization?.replace(/^Bearer/, "");
+
+    const user = verifyToken(token);
+
+    if (!token) {
+      reply.status(401).send("Unauthorized: missing token");
+    }
+    if (!user) {
+      throw "User not found";
+    }
+    request.user = user;
+    done();
+  } catch (error) {
+    console.error("Could not validate user: ", error);
+    return reply.status(400).send("Could not validate user");
+  }
+};

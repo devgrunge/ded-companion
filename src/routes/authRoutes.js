@@ -41,7 +41,7 @@ export async function authRoutes(server) {
 
       const checkAuth = await authService(email, password);
 
-      checkAuth ? reply.status(200).send("Logged in") : false;
+      checkAuth ? reply.status(200).send({ message: checkAuth }) : false;
     } catch (error) {
       console.error("Error logging into app: ", error);
       return reply.status(400).send("Error logging");

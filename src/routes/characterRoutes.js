@@ -1,43 +1,49 @@
 import { EntityModel } from "../models/entitiesModel.js";
-import { tokenVerification } from "../services/auth.js";
+import { validateToken } from "../services/auth.js";
 
 const database = new EntityModel();
 
 export async function characterRoutes(server) {
-  server.post("/characters", async (request, reply) => {
-    const body = request.body;
+  server.post(
+    "/characters",
+    {
+      preHandler: [validateToken],
+    },
+    async (request, reply) => {
+      const body = request.body;
 
-    try {
-      await database.create(
-        {
-          name: body.name,
-          level: body.level,
-          class: body.class,
-          attributes: {
-            for: body.attributes.for,
-            dex: body.attributes.dex,
-            con: body.attributes.con,
-            int: body.attributes.int,
-            wis: body.attributes.wis,
-            car: body.attributes.car,
+      try {
+        await database.create(
+          {
+            name: body.name,
+            level: body.level,
+            class: body.class,
+            attributes: {
+              for: body.attributes.for,
+              dex: body.attributes.dex,
+              con: body.attributes.con,
+              int: body.attributes.int,
+              wis: body.attributes.wis,
+              car: body.attributes.car,
+            },
+            hitpoints: body.hitpoints,
+            armor_class: body.armor_class,
           },
-          hitpoints: body.hitpoints,
-          armor_class: body.armor_class,
-        },
-        "player"
-      );
-      console.log(database.list());
-      return reply.status(201).send();
-    } catch (error) {
-      console.error("Error creating character: ", error);
-      response.status(500).send("Internal server error");
+          "player"
+        );
+        console.log(database.list());
+        return reply.status(201).send();
+      } catch (error) {
+        console.error("Error creating character: ", error);
+        response.status(500).send("Internal server error");
+      }
     }
-  });
+  );
 
   server.get(
     "/characters",
     {
-      tokenVerification,
+      preHandler: [validateToken],
     },
     async (request, reply) => {
       const search = request.query.search;
@@ -51,46 +57,58 @@ export async function characterRoutes(server) {
     }
   );
 
-  server.put("/characters/:id", async (request, reply) => {
-    const characterId = request.params.id;
-    const body = request.body;
+  server.put(
+    "/characters/:id",
+    {
+      preHandler: [validateToken],
+    },
+    async (request, reply) => {
+      const characterId = request.params.id;
+      const body = request.body;
 
-    try {
-      await database.update(
-        characterId,
-        {
-          name: body.name,
-          level: body.level,
-          class: body.class,
-          attributes: {
-            for: body.attributes.for,
-            dex: body.attributes.dex,
-            con: body.attributes.con,
-            int: body.attributes.int,
-            wis: body.attributes.wis,
-            car: body.attributes.car,
+      try {
+        await database.update(
+          characterId,
+          {
+            name: body.name,
+            level: body.level,
+            class: body.class,
+            attributes: {
+              for: body.attributes.for,
+              dex: body.attributes.dex,
+              con: body.attributes.con,
+              int: body.attributes.int,
+              wis: body.attributes.wis,
+              car: body.attributes.car,
+            },
+            hitpoints: body.hitpoints,
+            armor_class: body.armor_class,
           },
-          hitpoints: body.hitpoints,
-          armor_class: body.armor_class,
-        },
-        "player"
-      );
-      return reply.status(204).send();
-    } catch (error) {
-      console.error("Error updating character: ", error);
-      response.status(400).send("Id does not exist");
+          "player"
+        );
+        return reply.status(204).send();
+      } catch (error) {
+        console.error("Error updating character: ", error);
+        response.status(400).send("Id does not exist");
+      }
     }
-  });
+  );
 
-  server.delete("/characters/:id", (request, reply) => {
-    const characterId = request.params.id;
-    try {
-      database.delete(characterId, "player");
+  server.delete(
+    "/characters/:id",
+    {
+      preHandler: [validateToken],
+    },
+    (request, reply) => {
+      const characterId = request.params.id;
+      try {
+        database.delete(characterId, "player");
 
-      return reply.status(204).send();
-    } catch (error) {
-      console.error("Error deleting character: ", error);
-      return reply.status(500).send({ error: "Internal Server Error" });
+        return reply.status(204).send();
+      } catch (error) {
+        console.error("Error deleting character: ", error);
+        return reply.status(500).send({ error: "Internal Server Error" });
+      }
     }
-  });
+  );
 }
