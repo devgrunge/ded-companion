@@ -32,30 +32,19 @@ export const authService = async (email, password) => {
     throw error;
   }
 };
-const verifyToken = async (token) => {
-  try {
-    const decodedToken = Jwt.verify(token, appSecret);
-    console.log("my decoded token: ", decodedToken);
-    return decodedToken;
-  } catch (error) {
-    console.error("Invalid token", error);
-    return null;
-  }
-};
 
 export const validateToken = async (request, reply, done) => {
   try {
-    const token = request.headers.authorization?.replace(/^Bearer/, "");
-
-    const user = verifyToken(token);
+    const token = request.headers.authorization?.replace(/^Bearer/, "").trim();
+    const verifiedUser = Jwt.verify(token, appSecret);
 
     if (!token) {
       reply.status(401).send("Unauthorized: missing token");
     }
-    if (!user) {
+    if (!verifiedUser) {
       throw "User not found";
     }
-    request.user = user;
+    request.user = verifiedUser;
     done();
   } catch (error) {
     console.error("Could not validate user: ", error);

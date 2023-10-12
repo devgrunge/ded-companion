@@ -34,13 +34,15 @@ export class EntityModel {
     const dataId = randomUUID();
     const data = dataRequest;
 
+    console.log("my data",data)
+
     switch (entityType) {
       case "player":
-        await sql`insert into characters (id, name, level , class, attributes , armor_class, hitpoints ) VALUES (${dataId}, ${
+        await sql`insert into characters (id, name, level , class, attributes , armor_class, hitpoints, owner ) VALUES (${dataId}, ${
           data.name
         }, ${data.level}, ${data.class}, ${sql.json(data.attributes)}, ${
           data.armor_class
-        }, ${data.hitpoints})`;
+        }, ${data.hitpoints}, ${data.email})`;
         break;
 
       case "room":

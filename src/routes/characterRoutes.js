@@ -28,6 +28,7 @@ export async function characterRoutes(server) {
             },
             hitpoints: body.hitpoints,
             armor_class: body.armor_class,
+            owner: body.owner,
           },
           "player"
         );
