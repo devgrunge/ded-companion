@@ -6,7 +6,7 @@ import "dotenv/config";
 const database = new LoginModel();
 const appSecret = process.env.PRIVATE_KEY;
 
-export const authService = async (email, password) => {
+export const jwtAuth = async (email, password) => {
   try {
     const userExists = await database.getUserInfo(email);
 

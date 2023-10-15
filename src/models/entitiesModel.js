@@ -1,62 +1,83 @@
-import { sql } from "../config/db.js";
+import { dynamoClient } from "../config/db.js";
 import { randomUUID } from "node:crypto";
 import { nanoid } from "nanoid";
 
 export class EntityModel {
-  async list(search, entityType) {
+  async list(entityType) {
+    let TABLE_NAME;
     let query;
 
     switch (entityType) {
       case "player":
-        query = sql`select * from characters`;
+        TABLE_NAME = "Players";
         break;
 
-      case "dungeon_master":
-        query = sql`select * from dungeon_masters`;
-        break;
-
-      case "room":
-        query = sql`select * from rooms`;
-        break;
+      // ... (other cases)
 
       default:
         throw new Error("Unrecognized entity type");
     }
 
-    if (search) {
-      query.append(sql` where name ilike ${"%" + search + "%"}`);
-    }
+    const params = {
+      TableName: TABLE_NAME,
+    };
 
-    return await query;
+    try {
+      const result = await dynamoClient.scan(params).promise();
+      console.log(result);
+      return result.Items;
+    } catch (error) {
+      console.error("Error listing characters:", error);
+      throw error;
+    }
   }
 
   async create(dataRequest, entityType) {
-    const dataId = randomUUID();
     const data = dataRequest;
-
-    console.log("my data",data)
+    const playerDataString = JSON.stringify(data);
+    let TABLE_NAME;
+    let queryData;
 
     switch (entityType) {
       case "player":
-        await sql`insert into characters (id, name, level , class, attributes , armor_class, hitpoints, owner ) VALUES (${dataId}, ${
-          data.name
-        }, ${data.level}, ${data.class}, ${sql.json(data.attributes)}, ${
-          data.armor_class
-        }, ${data.hitpoints}, ${data.email})`;
+        TABLE_NAME = "Players";
+        queryData = {
+          player_data: playerDataString,
+        };
         break;
 
       case "room":
-        await sql`insert into rooms (id, room_name, invite_code) VALUES (${dataId}, ${
-          data.room_name
-        }, ${nanoid(4)})`;
+        TABLE_NAME = "Rooms"; // Use the actual table name
+        queryData = {
+          id: data.id, // Use id as the partition key
+          room_name: data.room_name,
+          invite_code: nanoid(4),
+        };
         break;
 
       case "dungeon_master":
-        await sql`insert into dungeon_master(id, dm_name) VALUES (${dataId}, ${data.dm_name})`;
+        TABLE_NAME = "Dungeon_Masters"; // Use the actual table name
+        queryData = {
+          id: data.id, // Use id as the partition key
+          dm_name: data.dm_name,
+        };
         break;
 
       default:
         throw new Error("Unrecognized entity type");
+    }
+
+    const params = {
+      TableName: TABLE_NAME,
+      Key: data.id,
+      Item: queryData,
+    };
+
+    try {
+      await dynamoClient.put(params).promise();
+    } catch (error) {
+      console.error("Error creating entity:", error);
+      throw error;
     }
   }
 

@@ -1,7 +1,7 @@
 {
   "name": "dungeons-and-dragons-companion",
   "version": "1.0.1",
-  "description": "",
+  "description": "An api to provide all necessary data to the dnd companion app!",
   "main": "server.js",
   "type": "module",
   "scripts": {
@@ -15,6 +15,7 @@
   "dependencies": {
     "@fastify/jwt": "^7.2.2",
     "@types/jsonwebtoken": "^9.0.3",
+    "aws-sdk": "^2.1473.0",
     "bcrypt": "^5.1.1",
     "fastify": "^4.23.2",
     "jsonwebtoken": "^9.0.2",
@@ -22,6 +23,7 @@
     "postgres": "^3.3.5"
   },
   "devDependencies": {
+    "@types/node": "^20.8.6",
     "dotenv": "^16.3.1"
   },
   "engines": {

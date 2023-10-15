@@ -1,4 +1,5 @@
 import { fastify } from "fastify";
+console.log("Hey darling :)");
 import { characterRoutes } from "./src/routes/characterRoutes.js";
 import { roomRoutes } from "./src/routes/roomRoutes.js";
 import { dungeonMasterRoutes } from "./src/routes/dungeonMasterRoutes.js";

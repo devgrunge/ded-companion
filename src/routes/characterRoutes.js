@@ -1,5 +1,6 @@
 import { EntityModel } from "../models/entitiesModel.js";
 import { validateToken } from "../services/auth.js";
+import { randomUUID } from "node:crypto";
 
 const database = new EntityModel();
 
@@ -11,10 +12,11 @@ export async function characterRoutes(server) {
     },
     async (request, reply) => {
       const body = request.body;
-
+      const dataId = randomUUID();
       try {
         await database.create(
           {
+            id: dataId,
             name: body.name,
             level: body.level,
             class: body.class,
@@ -32,8 +34,8 @@ export async function characterRoutes(server) {
           },
           "player"
         );
-        console.log(database.list());
-        return reply.status(201).send();
+        // console.log(database.list());
+        return reply.status(201).send(database.list);
       } catch (error) {
         console.error("Error creating character: ", error);
         response.status(500).send("Internal server error");
@@ -48,9 +50,15 @@ export async function characterRoutes(server) {
     },
     async (request, reply) => {
       const search = request.query.search;
+      console.log(request)
       try {
-        const data = await database.list(search, "player");
-        return data;
+        if(search){
+          const data = await database.list(search, "player");
+          return reply.status(200).send({ characters: data });
+        }else{
+          const data = await database.list("player");
+          return reply.status(200).send({ characters: data }); 
+        }
       } catch (error) {
         console.error("Error searching character: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });

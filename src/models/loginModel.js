@@ -1,4 +1,4 @@
-import { sql } from "../config/db.js";
+import { dynamoClient } from "../config/db.js";
 import { randomUUID } from "node:crypto";
 
 export class LoginModel {

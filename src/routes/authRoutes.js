@@ -1,5 +1,5 @@
 import { LoginModel } from "../models/loginModel.js";
-import { authService } from "../services/auth.js";
+import { jwtAuth } from "../services/auth.js";
 import bcrypt from "bcrypt";
 
 const database = new LoginModel();
@@ -39,7 +39,7 @@ export async function authRoutes(server) {
         return reply.status(400).send("Email and password are required");
       }
 
-      const checkAuth = await authService(email, password);
+      const checkAuth = await jwtAuth(email, password);
 
       checkAuth ? reply.status(200).send({ message: checkAuth }) : false;
     } catch (error) {
