@@ -67,13 +67,13 @@ export const roomRoutes = async (server) => {
       const roomId = request.params.id;
       const body = request.body;
 
-      console.log("roomid: ",roomId)
+      console.log("roomid: ", roomId);
       try {
         const updatedRoom = await inGameDatabase.updateRoom(roomId, {
           room_name: body.room_name,
         });
 
-        console.log("updated room",updatedRoom)
+        console.log("updated room", updatedRoom);
 
         if (!updatedRoom) {
           reply.status(404).send("Room not found");
@@ -97,9 +97,13 @@ export const roomRoutes = async (server) => {
       const roomId = request.params.id;
 
       try {
-        database.delete(roomId, "room");
+        const result = await inGameDatabase.deleteRoom(roomId);
 
-        return reply.status(204).send();
+        if (result.deletedCount === 1) {
+          return reply.status(204).send("Room deleted Sucessfully");
+        } else {
+          return reply.status(404).send({ error: "Room not found" });
+        }
       } catch (error) {
         console.error("Error deleting room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });
@@ -115,19 +119,30 @@ export const roomRoutes = async (server) => {
     },
     async (request, reply) => {
       try {
-        const { entity_id, room_id, entity_type } = request.body;
+        const { entity_id, room_id, character_id } = request.body;
 
-        if (entity_type === "player") {
-          await inGameDatabase.enterRoomPlayerRoom(entity_id, room_id);
-        } else if (entity_type === "dungeon_master") {
-          await inGameDatabase.enterRoomDungeonMasterRoom(entity_id, room_id);
-        } else {
-          return reply.status(400).send({ error: "Unrecognized entity type" });
+        const roomExists = await inGameDatabase.roomExists(room_id);
+        if (!roomExists) {
+          return reply.status(404).send({ error: "Room not found" });
         }
+
+        const characterBelongsToPlayer =
+          await inGameDatabase.characterBelongsToPlayer(
+            entity_id,
+            character_id
+          );
+
+        if (!characterBelongsToPlayer) {
+          return reply
+            .status(403)
+            .send({ error: "Character doesn't belong to the player" });
+        }
+
+        await inGameDatabase.enterRoom(entity_id, room_id, character_id);
 
         return reply
           .status(201)
-          .send({ message: `${entity_type} has entered the room.` });
+          .send({ message: "Player has entered the room." });
       } catch (error) {
         console.error("Error at entering this room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });
@@ -142,36 +157,20 @@ export const roomRoutes = async (server) => {
     },
     async (request, reply) => {
       try {
-        const { entity_id, room_id, entity_type } = request.body;
+        const { roomId, characterId } = request.body;
 
-        if (entity_type === "player") {
-          const existingEntry =
-            await inGameDatabase.checkPlayerRoomRelationship(
-              entity_id,
-              room_id
-            );
-          if (!existingEntry) {
-            return reply
-              .status(400)
-              .send({ error: "Player is not in the room." });
-          }
-          await inGameDatabase.leaveRoom(entity_id, room_id);
-        } else if (entity_type === "dungeon_master") {
-          const existingEntry =
-            await inGameDatabase.checkDungeonMasterRoomRelationship(
-              entity_id,
-              room_id
-            );
-          if (!existingEntry) {
-            return reply
-              .status(400)
-              .send({ error: "Player is not in the room." });
-          }
-          await inGameDatabase.dungeonMasterLeaveRoom(entity_id, room_id);
+        const room = await inGameDatabase.leaveRoom(
+          roomId,
+          characterId
+        );
+
+        if (!room) {
+          return reply.status(404).send({ error: "Room not found" });
         }
-        // Remove the player from the room
+
+        return reply.status(204).send("Character deleted sucessfully");
       } catch (error) {
-        console.error("Error at leaving room: ", error);
+        console.error("Error deleting character from room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });
       }
     }

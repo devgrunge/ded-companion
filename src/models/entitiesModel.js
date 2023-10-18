@@ -142,4 +142,25 @@ export class EntityModel {
       throw error;
     }
   }
+
+  async fetchCharacterData(playerId, characterId) {
+    const db = mongoClient.db("dndcompanion");
+    const playersCollection = db.collection("Players");
+
+    try {
+      const player = await playersCollection.findOne({ id: playerId });
+
+      if (!player || !player.characters) {
+        return null;
+      }
+
+      const character = player.characters.find(
+        (char) => char.id === characterId
+      );
+
+      return character;
+    } catch (error) {
+      throw error;
+    }
+  }
 }
