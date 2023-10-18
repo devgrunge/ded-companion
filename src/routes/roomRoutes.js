@@ -1,6 +1,8 @@
+import { randomUUID } from "node:crypto";
 import { EntityModel } from "../models/entitiesModel.js";
 import { InGameModel } from "../models/inGameModel.js";
 import { validateToken } from "../services/auth.js";
+import { nanoid } from "nanoid";
 
 const database = new EntityModel();
 const inGameDatabase = new InGameModel();
@@ -13,15 +15,18 @@ export const roomRoutes = async (server) => {
     },
     async (request, reply) => {
       const body = request.body;
+      const roomId = randomUUID();
+      const inviteCode = nanoid(4);
 
       try {
-        await database.create(
-          {
-            room_name: body.room_name,
-          },
-          "room"
-        );
-        return reply.status(204).send();
+        const createdRoom = await inGameDatabase.create({
+          room_id: roomId,
+          room_name: body.room_name,
+          inviteCode: inviteCode,
+          players: [],
+        });
+
+        return reply.status(201).send(createdRoom);
       } catch (error) {
         console.error("Error creating room:", error);
         reply.status(500).send("Internal server error");
@@ -30,18 +35,25 @@ export const roomRoutes = async (server) => {
   );
 
   server.get(
-    "/rooms",
+    "/rooms/:inviteCode",
     {
       preHandler: [validateToken],
     },
     async (request, reply) => {
-      const search = request.query.search;
+      const inviteCode = request.params.inviteCode;
+
       try {
-        const data = await database.list(search, "room");
-        return data;
+        const room = await inGameDatabase.getRoomByInviteCode(inviteCode);
+
+        if (!room) {
+          reply.status(404).send("Room not found");
+          return;
+        }
+
+        return reply.status(200).send(room);
       } catch (error) {
-        console.error("Error listing Room: ", error);
-        return reply.status(500).send({ error: "Internal Server Error" });
+        console.error("Error getting room:", error);
+        reply.status(500).send("Internal server error");
       }
     }
   );
@@ -55,18 +67,23 @@ export const roomRoutes = async (server) => {
       const roomId = request.params.id;
       const body = request.body;
 
+      console.log("roomid: ",roomId)
       try {
-        await database.update(
-          roomId,
-          {
-            room_name: body.room_name,
-          },
-          "room"
-        );
-        return reply.status(204).send();
+        const updatedRoom = await inGameDatabase.updateRoom(roomId, {
+          room_name: body.room_name,
+        });
+
+        console.log("updated room",updatedRoom)
+
+        if (!updatedRoom) {
+          reply.status(404).send("Room not found");
+          return;
+        }
+
+        reply.status(204).send("Room updated sucessfully");
       } catch (error) {
         console.error("Error updating Room:", error);
-        response.status(400).send("Id does not exist");
+        reply.status(500).send("Internal server error");
       }
     }
   );

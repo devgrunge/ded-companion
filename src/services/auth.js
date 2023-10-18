@@ -8,12 +8,13 @@ const appSecret = process.env.PRIVATE_KEY;
 
 export const jwtAuth = async (email, password) => {
   try {
+    console.log(email, password)
     const userExists = await database.getUserInfo(email);
 
     if (userExists.length === 0) {
       throw "User not found";
     }
-    const storedPassword = userExists[0].password;
+    const storedPassword = userExists.password;
 
     const isSamePassword = bcrypt.compareSync(password, storedPassword);
 
@@ -21,7 +22,7 @@ export const jwtAuth = async (email, password) => {
       throw "Wrong password";
     }
 
-    const userId = userExists[0].id;
+    const userId = userExists.id;
     const token = Jwt.sign({ id: userId, email: email }, appSecret, {
       expiresIn: "365d",
     });

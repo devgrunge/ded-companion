@@ -15,12 +15,11 @@
   "dependencies": {
     "@fastify/jwt": "^7.2.2",
     "@types/jsonwebtoken": "^9.0.3",
-    "aws-sdk": "^2.1473.0",
     "bcrypt": "^5.1.1",
     "fastify": "^4.23.2",
     "jsonwebtoken": "^9.0.2",
-    "nanoid": "^5.0.1",
-    "postgres": "^3.3.5"
+    "mongodb": "^6.1.0",
+    "nanoid": "^5.0.1"
   },
   "devDependencies": {
     "@types/node": "^20.8.6",

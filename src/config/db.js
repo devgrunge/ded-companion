@@ -1,12 +1,18 @@
 import "dotenv/config";
-import AWS from "aws-sdk";
+import { MongoClient } from "mongodb";
 
-// Configure as credenciais AWS
-AWS.config.update({
-  region: process.env.AWSREGION,
-  accessKeyId: process.env.ACCESSKEYID,
-  secretAccessKey: process.env.SECRETACESSKEY,
-});
+const dbPassword = process.env.DBPASSWORD;
+const uri = `mongodb+srv://admingrunge:${dbPassword}@cluster0.1vwytba.mongodb.net/`;
 
-// Creating instance of DynamoDB
-export const dynamoClient = new AWS.DynamoDB.DocumentClient();
+const mongoClient = new MongoClient(uri);
+
+async function connectToMongoDB() {
+  try {
+    await mongoClient.connect();
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error);
+  }
+}
+
+export { mongoClient, connectToMongoDB };

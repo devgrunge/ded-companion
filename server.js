@@ -1,5 +1,5 @@
-import { fastify } from "fastify";
 console.log("Hey darling :)");
+import { fastify } from "fastify";
 import { characterRoutes } from "./src/routes/characterRoutes.js";
 import { roomRoutes } from "./src/routes/roomRoutes.js";
 import { dungeonMasterRoutes } from "./src/routes/dungeonMasterRoutes.js";
@@ -9,7 +9,6 @@ import "dotenv/config";
 const server = fastify();
 //JWT Auth
 authRoutes(server);
-
 //Game Routes
 characterRoutes(server);
 roomRoutes(server);

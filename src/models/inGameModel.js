@@ -1,6 +1,66 @@
-import { dynamoClient } from "../config/db.js";
+import { mongoClient } from "../config/db.js";
 
 export class InGameModel {
+  async create(dataRequest, creatorId) {
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
+    const playersCollection = db.collection("Players");
+
+    try {
+      const result = await roomsCollection.insertOne(dataRequest);
+
+      return result.ops;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async setDungeonMaster(playerId) {
+    const db = mongoClient.db("dndcompanion");
+    const playersCollection = db.collection("Players");
+
+    try {
+      await playersCollection.updateOne(
+        { id: playerId },
+        { $set: { isDm: true } }
+      );
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getRoomByInviteCode(inviteCode) {
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
+
+    try {
+      const room = await roomsCollection.findOne({ inviteCode: inviteCode });
+
+      return room;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateRoom(roomId, updatedData) {
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
+
+    try {
+      const result = await roomsCollection.findOneAndUpdate(
+        { room_id: roomId },
+        { $set: updatedData },
+        { returnOriginal: false }
+      );
+
+      console.log("result: ", result);
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async enterRoomPlayerRoom(playerId, roomId) {
     // try {
     //   // Check if the player is already in the room
@@ -16,64 +76,9 @@ export class InGameModel {
     // }
   }
 
-  async enterRoomDungeonMasterRoom(dmID, roomId) {
-    // try {
-    //   // Check if the player is already in the room
-    //   const existingEntry =
-    //     await sql`select * from dungeon_masters_rooms where dm_id = ${dmID} and room_id = ${roomId}`;
-    //   if (existingEntry.length > 0) {
-    //     throw new Error("Dm is already in the room.");
-    //   }
-    //   // Delete player from players_rooms table
-    //   await sql`insert into dungeon_masters_rooms (dm_id, room_id) VALUES (${dmID}, ${roomId})`;
-    // } catch (error) {
-    //   throw error;
-    // }
-  }
-
-  async checkPlayerRoomRelationship(playerId, roomId) {
-    // try {
-    //   const existingEntry =
-    //     await sql`select * from players_rooms where player_id = ${playerId} and room_id = ${roomId}`;
-
-    //   if (existingEntry && existingEntry.length === 0) {
-    //     throw new Error("Player is not in the room.");
-    //   } else {
-    //     return true;
-    //   }
-    // } catch (error) {
-    //   console.error("Error in checkPlayerRoomRelationship:", error);
-    //   throw error;
-    // }
-  }
-
-  async checkDungeonMasterRoomRelationship(dm_id, room_id) {
-    // try {
-    //   const existingEntry =
-    //     await sql`select * from dungeon_masters_rooms where dm_id = ${dm_id} and room_id = ${room_id}`;
-
-    //   if (existingEntry && existingEntry.length === 0) {
-    //     throw new Error("Dungeon master is not in the room.");
-    //   } else {
-    //     return true;
-    //   }
-    // } catch (error) {
-    //   console.error("Error in checkPlayerRoomRelationship:", error);
-    //   throw error;
-    // }
-  }
-
   async leaveRoom(playerId, roomId) {
     // try {
     //   await sql`delete from players_rooms where player_id = ${playerId} and room_id = ${roomId}`;
-    // } catch (error) {
-    //   throw error;
-    // }
-  }
-
-  async dungeonMasterLeaveRoom(dmId, roomId) {
-    // try {
-    //   await sql`delete from dungeon_masters_rooms where dm_id = ${dmId} and room_id = ${roomId}`;
     // } catch (error) {
     //   throw error;
     // }
@@ -95,21 +100,6 @@ export class InGameModel {
     //   WHERE players_rooms.room_id = ${roomId}
     // `;
     //   return playersInRoom;
-    // } catch (error) {
-    //   throw error;
-    // }
-  }
-
-  async getDungeonMastersInRoom(roomId) {
-    // try {
-    //   const dungeonMastersInRoom = await sql`
-    //     SELECT dungeon_masters.id, dungeon_masters.dm_name
-    //     FROM dungeon_masters
-    //     JOIN dungeon_masters_rooms ON dungeon_masters.id = dungeon_masters_rooms.dm_id
-    //     WHERE dungeon_masters_rooms.room_id = ${roomId}
-    //   `;
-
-    //   return dungeonMastersInRoom;
     // } catch (error) {
     //   throw error;
     // }

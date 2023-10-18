@@ -1,136 +1,145 @@
-import { dynamoClient } from "../config/db.js";
 import { randomUUID } from "node:crypto";
 import { nanoid } from "nanoid";
+import { mongoClient } from "../config/db.js";
+import { LoginModel } from "./loginModel.js";
+
+const database = new LoginModel();
 
 export class EntityModel {
-  async list(entityType) {
-    let TABLE_NAME;
-    let query;
-
-    switch (entityType) {
-      case "player":
-        TABLE_NAME = "Players";
-        break;
-
-      // ... (other cases)
-
-      default:
-        throw new Error("Unrecognized entity type");
-    }
-
-    const params = {
-      TableName: TABLE_NAME,
-    };
+  async list(ownerEmail) {
+    const db = mongoClient.db("dndcompanion");
+    const collection = db.collection("Players");
 
     try {
-      const result = await dynamoClient.scan(params).promise();
-      console.log(result);
-      return result.Items;
+      const player = await collection.findOne({ email: ownerEmail });
+
+      if (player && player.characters) {
+        return player.characters;
+      } else {
+        return [];
+      }
     } catch (error) {
-      console.error("Error listing characters:", error);
       throw error;
     }
   }
 
-  async create(dataRequest, entityType) {
-    const data = dataRequest;
-    const playerDataString = JSON.stringify(data);
-    let TABLE_NAME;
-    let queryData;
-
-    switch (entityType) {
-      case "player":
-        TABLE_NAME = "Players";
-        queryData = {
-          player_data: playerDataString,
-        };
-        break;
-
-      case "room":
-        TABLE_NAME = "Rooms"; // Use the actual table name
-        queryData = {
-          id: data.id, // Use id as the partition key
-          room_name: data.room_name,
-          invite_code: nanoid(4),
-        };
-        break;
-
-      case "dungeon_master":
-        TABLE_NAME = "Dungeon_Masters"; // Use the actual table name
-        queryData = {
-          id: data.id, // Use id as the partition key
-          dm_name: data.dm_name,
-        };
-        break;
-
-      default:
-        throw new Error("Unrecognized entity type");
-    }
-
-    const params = {
-      TableName: TABLE_NAME,
-      Key: data.id,
-      Item: queryData,
-    };
-
+  async create(email, characterData) {
     try {
-      await dynamoClient.put(params).promise();
+      const player = await database.getUserInfo(email);
+
+      if (!player) {
+        throw new Error("Player not found");
+      }
+
+      if (!player.characters) {
+        player.characters = [];
+      }
+
+      player.characters.push(characterData);
+
+      const db = mongoClient.db("dndcompanion");
+      const collection = db.collection("Players");
+
+      const filter = { email: email };
+      const update = { $set: { characters: player.characters } };
+
+      const result = await collection.updateOne(filter, update);
+
+      if (result.modifiedCount === 1) {
+        return player;
+      } else {
+        throw new Error("Failed to update the player's document");
+      }
     } catch (error) {
-      console.error("Error creating entity:", error);
+      console.error("Error creating character:", error);
       throw error;
     }
   }
 
-  async update(id, dataRequest, entityType) {
-    const data = dataRequest;
-    let query;
+  async update(id, dataRequest) {
+    try {
+      const db = MongoClient.db("dndcompanion");
+      const collection = db.collection("Players");
 
-    switch (entityType) {
-      case "player":
-        query = sql`update characters set name = ${data.name}, class = ${
-          data.class
-        }, level = ${data.level}, attributes = ${sql.json(
-          data.attributes
-        )}, armor_class = ${data.armor_class}, hitpoints = ${
-          data.hitpoints
-        } WHERE id = ${id}`;
-        break;
+      const currentUserEmail = dataRequest.owner; // Get the owner's email from the request data
 
-      case "dungeon_master":
-        query = sql`update dungeon_masters set dm_name = ${data.dm_name} WHERE id = ${id}`;
-        break;
+      // Use the email to find the player document
+      const player = await collection.findOne({ email: currentUserEmail });
 
-      case "room":
-        query = sql`update rooms set room_name = ${data.room_name} WHERE id = ${id}`;
-        break;
+      if (player && player.characters) {
+        const updatedCharacters = player.characters.map((character) => {
+          if (character.id === id) {
+            return {
+              id,
+              name: dataRequest.name,
+              level: dataRequest.level,
+              class: dataRequest.class,
+              attributes: {
+                for: dataRequest.attributes.for,
+                dex: dataRequest.attributes.dex,
+                con: dataRequest.attributes.con,
+                int: dataRequest.attributes.int,
+                wis: dataRequest.attributes.wis,
+                car: dataRequest.attributes.car,
+              },
+              hitpoints: dataRequest.hitpoints,
+              armor_class: dataRequest.armor_class,
+            };
+          }
+          return character; // Return unchanged characters
+        });
 
-      default:
-        throw new Error("Unrecognized entity type");
+        // Update the characters array in the player document
+        await collection.updateOne(
+          { email: currentUserEmail },
+          { $set: { characters: updatedCharacters } }
+        );
+
+        return true; // Update successful
+      } else {
+        return false; // Character not found or unauthorized
+      }
+    } catch (error) {
+      throw error; // Handle the error appropriately in your route
     }
-
-    await query;
   }
 
-  async delete(id, entityType) {
-    let query;
+  async delete(id, ownerEmail) {
+    try {
+      const db = mongoClient.db("dndcompanion");
+      const collection = db.collection("Players");
 
-    switch (entityType) {
-      case "player":
-        query = sql`delete from characters where id = ${id}`;
-        break;
+      const player = await collection.findOne({ email: ownerEmail });
 
-      case "dungeon_master":
-        query = sql`delete from dungeon_masters where id = ${id}`;
-        break;
+      if (player && player.characters) {
+        const updatedCharacters = player.characters.filter(
+          (character) => character.id !== id
+        );
 
-      case "room":
-        query = sql`delete from rooms where id = ${id}`;
-        break;
+        await collection.updateOne(
+          { email: ownerEmail },
+          { $set: { characters: updatedCharacters } }
+        );
 
-      default:
-        throw new Error("Unrecognized entity type");
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      throw error;
     }
+  }
 
-    await query;
+  async retrievePlayerData(playerId) {
+    const db = mongoClient.db("dndcompanion");
+    const playersCollection = db.collection("Players");
+
+    try {
+      const player = await playersCollection.findOne({ id: playerId });
+      console.log("the player",player)
+      return player;
+    } catch (error) {
+      throw error;
+    }
   }
 }

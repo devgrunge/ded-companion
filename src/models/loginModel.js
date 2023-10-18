@@ -1,20 +1,58 @@
-import { dynamoClient } from "../config/db.js";
 import { randomUUID } from "node:crypto";
+import { mongoClient } from "../config/db.js";
 
 export class LoginModel {
   async createAccount(email, password, name) {
     const dataId = randomUUID();
+    const db = mongoClient.db("dndcompanion");
+    const collection = db.collection("Players");
 
-    const login =
-      await sql`INSERT INTO users (id, name, email, password) VALUES (${dataId}, ${name}, ${email}, ${password})`;
-    return login;
+    const user = {
+      id: dataId,
+      name: name,
+      email: email,
+      password: password,
+      characters: [],
+      isDm: false,
+      theme: "default"
+    };
+
+    try {
+      const result = await collection.insertOne(user);
+
+      if (result && result.insertedId) {
+        return user;
+      } else {
+        throw new Error("User creation failed");
+      }
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getUserInfo(email) {
+    const db = mongoClient.db("dndcompanion");
+    const collection = db.collection("Players");
+
     try {
-      const findUser = await sql`select * from users where email = ${email}`;
-      console.log(findUser);
-      return findUser;
+      const user = await collection.findOne({ email });
+      return user;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async deleteUser(userId) {
+    const db = mongoClient.db("dndcompanion");
+    const collection = db.collection("Players");
+
+    try {
+      const result = await collection.deleteOne({ id: userId });
+
+      if (result && result.deletedCount > 0) {
+        return true;
+      } else {
+        return false;
+      }
     } catch (error) {
       throw error;
     }
