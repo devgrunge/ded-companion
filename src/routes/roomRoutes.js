@@ -157,11 +157,11 @@ export const roomRoutes = async (server) => {
     },
     async (request, reply) => {
       try {
-        const { roomId, characterId } = request.body;
+        const body = request.body;
 
         const room = await inGameDatabase.leaveRoom(
-          roomId,
-          characterId
+          body.room_id,
+          body.character_id
         );
 
         if (!room) {

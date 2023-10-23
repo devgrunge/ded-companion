@@ -148,8 +148,6 @@ export class InGameModel {
         { returnOriginal: false }
       );
 
-  
-
       return updatedRoom.value;
     } catch (error) {
       throw error;
@@ -161,17 +159,30 @@ export class InGameModel {
     const roomsCollection = db.collection("Rooms");
 
     try {
-      const result = await roomsCollection.findOneAndUpdate(
-        { room_id: roomId },
-        { $pull: { players: { character: { id: characterId } } } },
-        { returnOriginal: false }
-      );
-
-      if (result.value === null) {
-        throw new Error("Character not found in the room.");
+      if (!roomId || !characterId) {
+        throw new Error("Invalid roomId or characterId");
       }
 
-      return result.value;
+      const existingRoom = await roomsCollection.findOne({ room_id: roomId });
+
+      if (!existingRoom) {
+        throw new Error("Room not found");
+      }
+
+      console.log(
+        "Document to update:",
+        await roomsCollection.findOne({ room_id: roomId })
+      );
+      const removePlayer = await roomsCollection.updateOne(
+        { room_id: roomId, "players.character.id": characterId },
+        { $pull: { players: { "character.id": characterId } } }
+      );
+
+      if (removePlayer.modifiedCount === 0) {
+        throw new Error("Player not found");
+      }
+
+      return removePlayer;
     } catch (error) {
       throw error;
     }
