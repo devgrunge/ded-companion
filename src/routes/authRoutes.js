@@ -1,5 +1,5 @@
+import { jwtAuth, validateToken } from "../services/auth.js";
 import { LoginModel } from "../models/loginModel.js";
-import { authService } from "../services/auth.js";
 import bcrypt from "bcrypt";
 
 const database = new LoginModel();
@@ -17,7 +17,7 @@ export async function authRoutes(server) {
 
       const userExists = await database.getUserInfo(email);
 
-      if (userExists.length > 0) {
+      if (userExists !== null && userExists.length > 0) {
         return reply.status(400).send("User email already registered");
       }
       const encryptedPassword = bcrypt.hashSync(password, 10);
@@ -39,12 +39,37 @@ export async function authRoutes(server) {
         return reply.status(400).send("Email and password are required");
       }
 
-      const checkAuth = await authService(email, password);
+      const checkAuth = await jwtAuth(email, password);
 
       checkAuth ? reply.status(200).send({ message: checkAuth }) : false;
     } catch (error) {
       console.error("Error logging into app: ", error);
-      return reply.status(400).send("Error logging");
+      return reply.status(400).send("Error logging: ", error);
     }
   });
+  
+  server.delete(
+  "/users/:id",
+  {
+    preHandler: [validateToken],
+  },
+  async (request, reply) => {
+    try {
+      const userId = request.params.id;
+      console.log("userId: ",userId)
+
+      const success = await database.deleteUser(userId);
+
+      if (success) {
+        return reply.status(204).send("User deleted successfully");
+      } else {
+        return reply.status(404).send("User not found or unauthorized");
+      }
+    } catch (error) {
+      console.error("Error deleting user: ", error);
+      return reply.status(500).send("Internal Server Error");
+    }
+  }
+);
+
 }

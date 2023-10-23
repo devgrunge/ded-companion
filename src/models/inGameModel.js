@@ -1,115 +1,188 @@
-import { sql } from "../config/db.js";
+import { mongoClient } from "../config/db.js";
+import { EntityModel } from "./entitiesModel.js";
+
+const database = new EntityModel();
 
 export class InGameModel {
-  async enterRoomPlayerRoom(playerId, roomId) {
+  async create(dataRequest, creatorId) {
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
+    const playersCollection = db.collection("Players");
+
     try {
-      // Check if the player is already in the room
-      const existingEntry =
-        await sql`select * from players_rooms where player_id = ${playerId} and room_id = ${roomId}`;
-      if (existingEntry.length > 0) {
-        throw new Error("Player is already in the room.");
-      }
-      // Delete player from players_rooms table
-      await sql`insert into players_rooms (player_id, room_id) VALUES (${playerId}, ${roomId})`;
+      const result = await roomsCollection.insertOne(dataRequest);
+
+      return result.ops;
     } catch (error) {
       throw error;
     }
   }
 
-  async enterRoomDungeonMasterRoom(dmID, roomId) {
+  async setDungeonMaster(playerId) {
+    const db = mongoClient.db("dndcompanion");
+    const playersCollection = db.collection("Players");
+
     try {
-      // Check if the player is already in the room
-      const existingEntry =
-        await sql`select * from dungeon_masters_rooms where dm_id = ${dmID} and room_id = ${roomId}`;
-      if (existingEntry.length > 0) {
-        throw new Error("Dm is already in the room.");
-      }
-      // Delete player from players_rooms table
-      await sql`insert into dungeon_masters_rooms (dm_id, room_id) VALUES (${dmID}, ${roomId})`;
+      await playersCollection.updateOne(
+        { id: playerId },
+        { $set: { isDm: true } }
+      );
     } catch (error) {
       throw error;
     }
   }
 
-  async checkPlayerRoomRelationship(playerId, roomId) {
-    try {
-      const existingEntry =
-        await sql`select * from players_rooms where player_id = ${playerId} and room_id = ${roomId}`;
+  async getRoomByInviteCode(inviteCode) {
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
 
-      if (existingEntry && existingEntry.length === 0) {
-        throw new Error("Player is not in the room.");
+    try {
+      const room = await roomsCollection.findOne({ inviteCode: inviteCode });
+
+      return room;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateRoom(roomId, updatedData) {
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
+
+    try {
+      const result = await roomsCollection.findOneAndUpdate(
+        { room_id: roomId },
+        { $set: updatedData },
+        { returnOriginal: false }
+      );
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async deleteRoom(roomId) {
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
+
+    try {
+      const result = await roomsCollection.deleteOne({ room_id: roomId });
+
+      return result;
+    } catch (error) {
+      throw error;
+    }
+  }
+  async roomExists(roomId) {
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
+
+    try {
+      const room = await roomsCollection.findOne({ room_id: roomId });
+      return room !== null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async characterBelongsToPlayer(playerId, characterId) {
+    const db = mongoClient.db("dndcompanion");
+    const playersCollection = db.collection("Players");
+
+    try {
+      const player = await playersCollection.findOne({ id: playerId });
+
+      if (!player || !player.characters) {
+        return false;
+      }
+
+      const character = player.characters.find(
+        (char) => char.id === characterId
+      );
+      return character !== undefined;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async enterRoom(playerId, roomId, characterId) {
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
+
+    try {
+      const character = await database.fetchCharacterData(
+        playerId,
+        characterId
+      );
+
+      if (!character) {
+        throw new Error("Character not found.");
+      }
+
+      // Fetch the room and its players
+      const room = await roomsCollection.findOne({ room_id: roomId });
+
+      if (!room) {
+        throw new Error("Room not found.");
+      }
+
+      const existingPlayerIndex = room.players.findIndex(
+        (player) => player.id === playerId
+      );
+
+      if (existingPlayerIndex !== -1) {
+        // Player already exists, update their character
+        room.players[existingPlayerIndex].character = character;
       } else {
-        return true;
+        // Player doesn't exist, add them to the room
+        room.players.push({
+          id: playerId,
+          character: character,
+        });
       }
+
+      const updatedRoom = await roomsCollection.findOneAndUpdate(
+        { room_id: roomId },
+        { $set: { players: room.players } },
+        { returnOriginal: false }
+      );
+
+      return updatedRoom.value;
     } catch (error) {
-      console.error("Error in checkPlayerRoomRelationship:", error);
       throw error;
     }
   }
 
-  async checkDungeonMasterRoomRelationship(dm_id, room_id) {
-    try {
-      const existingEntry =
-        await sql`select * from dungeon_masters_rooms where dm_id = ${dm_id} and room_id = ${room_id}`;
+  async leaveRoom(roomId, characterId) {
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
 
-      if (existingEntry && existingEntry.length === 0) {
-        throw new Error("Dungeon master is not in the room.");
-      } else {
-        return true;
+    try {
+      if (!roomId || !characterId) {
+        throw new Error("Invalid roomId or characterId");
       }
-    } catch (error) {
-      console.error("Error in checkPlayerRoomRelationship:", error);
-      throw error;
-    }
-  }
 
-  async leaveRoom(playerId, roomId) {
-    try {
-      await sql`delete from players_rooms where player_id = ${playerId} and room_id = ${roomId}`;
-    } catch (error) {
-      throw error;
-    }
-  }
+      const existingRoom = await roomsCollection.findOne({ room_id: roomId });
 
-  async dungeonMasterLeaveRoom(dmId, roomId) {
-    try {
-      await sql`delete from dungeon_masters_rooms where dm_id = ${dmId} and room_id = ${roomId}`;
-    } catch (error) {
-      throw error;
-    }
-  }
+      if (!existingRoom) {
+        throw new Error("Room not found");
+      }
 
-  async getPlayersInRoom(roomId) {
-    try {
-      const playersInRoom = await sql`
-      SELECT
-        characters.id,
-        characters.name,
-        characters.armor_class,
-        characters.attributes,
-        characters.class,
-        characters.hitpoints,
-        characters.level
-      FROM characters
-      JOIN players_rooms ON characters.id = players_rooms.player_id
-      WHERE players_rooms.room_id = ${roomId}
-    `;
-      return playersInRoom;
-    } catch (error) {
-      throw error;
-    }
-  }
+      console.log(
+        "Document to update:",
+        await roomsCollection.findOne({ room_id: roomId })
+      );
+      const removePlayer = await roomsCollection.updateOne(
+        { room_id: roomId, "players.character.id": characterId },
+        { $pull: { players: { "character.id": characterId } } }
+      );
 
-  async getDungeonMastersInRoom(roomId) {
-    try {
-      const dungeonMastersInRoom = await sql`
-        SELECT dungeon_masters.id, dungeon_masters.dm_name
-        FROM dungeon_masters
-        JOIN dungeon_masters_rooms ON dungeon_masters.id = dungeon_masters_rooms.dm_id
-        WHERE dungeon_masters_rooms.room_id = ${roomId}
-      `;
+      if (removePlayer.modifiedCount === 0) {
+        throw new Error("Player not found");
+      }
 
-      return dungeonMastersInRoom;
+      return removePlayer;
     } catch (error) {
       throw error;
     }

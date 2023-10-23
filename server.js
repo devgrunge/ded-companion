@@ -1,3 +1,4 @@
+console.log("Hey darling :)");
 import { fastify } from "fastify";
 import { characterRoutes } from "./src/routes/characterRoutes.js";
 import { roomRoutes } from "./src/routes/roomRoutes.js";
@@ -8,7 +9,6 @@ import "dotenv/config";
 const server = fastify();
 //JWT Auth
 authRoutes(server);
-
 //Game Routes
 characterRoutes(server);
 roomRoutes(server);

@@ -1,14 +1,18 @@
 import "dotenv/config";
-import postgres from "postgres";
+import { MongoClient } from "mongodb";
 
-const { PGHOST, PGDATABASE, PGUSER, PGPASSWORD, ENDPOINT_ID } = process.env;
-const URL = `postgres://${PGUSER}:${PGPASSWORD}@${PGHOST}/${PGDATABASE}?options=project%3D${ENDPOINT_ID}`;
+const dbPassword = process.env.DBPASSWORD;
+const uri = `mongodb+srv://admingrunge:${dbPassword}@cluster0.1vwytba.mongodb.net/`;
 
-export const sql = postgres(URL, { ssl: "require" });
+const mongoClient = new MongoClient(uri);
 
-async function getPgVersion() {
-  const result = await sql`select version()`;
-  console.log(result[0]);
+async function connectToMongoDB() {
+  try {
+    await mongoClient.connect();
+    console.log("Connected to MongoDB");
+  } catch (error) {
+    console.error("Error connecting to MongoDB:", error);
+  }
 }
 
-getPgVersion();
+export { mongoClient, connectToMongoDB };
