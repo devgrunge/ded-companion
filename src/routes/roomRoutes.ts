@@ -4,12 +4,13 @@ import { EntityModel } from "../models/entitiesModel.js";
 import { InGameModel } from "../models/inGameModel.js";
 import { validateToken } from "../services/auth.js";
 import { nanoid } from "nanoid";
+import { RoomData, RouteInterface } from "./types/routeTypes.js";
 
 const database = new EntityModel();
 const inGameDatabase = new InGameModel();
 
 export const roomRoutes = async (server: FastifyInstance) => {
-  server.post(
+  server.post<RouteInterface>(
     "/rooms",
     {
       preHandler: [validateToken],
@@ -20,17 +21,17 @@ export const roomRoutes = async (server: FastifyInstance) => {
       const inviteCode = nanoid(4);
 
       try {
-        const createdRoom = await inGameDatabase.create({
+        const createdRoom: RoomData = await inGameDatabase.create({
           room_id: roomId,
           room_name: body.room_name,
           inviteCode: inviteCode,
           players: [],
         });
 
-        return reply.status(201).send(createdRoom);
+        return reply.status(201).send({ created: "Room created sucessfuly" });
       } catch (error) {
         console.error("Error creating room:", error);
-        reply.status(500).send("Internal server error");
+        reply.status(500).send({ error: "Internal server error" });
       }
     }
   );
@@ -47,7 +48,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
         const room = await inGameDatabase.getRoomByInviteCode(inviteCode);
 
         if (!room) {
-          reply.status(404).send("Room not found");
+          reply.status(404).send({ error: "Room not found" });
           return;
         }
 
@@ -59,7 +60,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
     }
   );
 
-  server.put(
+  server.put<RouteInterface>(
     "/rooms/:id",
     {
       preHandler: [validateToken],
@@ -77,11 +78,11 @@ export const roomRoutes = async (server: FastifyInstance) => {
         console.log("updated room", updatedRoom);
 
         if (!updatedRoom) {
-          reply.status(404).send("Room not found");
+          reply.status(404).send({ error: "Room not found" });
           return;
         }
 
-        reply.status(204).send("Room updated sucessfully");
+        reply.status(204).send({ updated: "Room updated sucessfully" });
       } catch (error) {
         console.error("Error updating Room:", error);
         reply.status(500).send("Internal server error");
@@ -89,7 +90,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
     }
   );
 
-  server.delete(
+  server.delete<RouteInterface>(
     "/rooms/:id",
     {
       preHandler: [validateToken],
@@ -101,7 +102,9 @@ export const roomRoutes = async (server: FastifyInstance) => {
         const result = await inGameDatabase.deleteRoom(roomId);
 
         if (result.deletedCount === 1) {
-          return reply.status(204).send("Room deleted Sucessfully");
+          return reply
+            .status(204)
+            .send({ updated: "Room deleted Sucessfully" });
         } else {
           return reply.status(404).send({ error: "Room not found" });
         }
@@ -113,7 +116,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
   );
 
   // Handling relationship between rooms and players
-  server.post(
+  server.post<RouteInterface>(
     "/rooms/enter",
     {
       preHandler: [validateToken],
@@ -143,7 +146,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
 
         return reply
           .status(201)
-          .send({ message: "Player has entered the room." });
+          .send({ created: "Player has entered the room." });
       } catch (error) {
         console.error("Error at entering this room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });
@@ -151,7 +154,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
     }
   );
 
-  server.delete(
+  server.delete<RouteInterface>(
     "/rooms/leave",
     {
       preHandler: [validateToken],
@@ -177,7 +180,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
     }
   );
 
-  server.get(
+  server.get<RouteInterface>(
     "/rooms/players/:room_id",
     {
       preHandler: [validateToken],
@@ -196,7 +199,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
     }
   );
 
-  server.get(
+  server.get<RouteInterface>(
     "/rooms/dungeon_masters/:room_id",
     {
       preHandler: [validateToken],

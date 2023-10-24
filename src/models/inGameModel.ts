@@ -1,10 +1,11 @@
 import { mongoClient } from "../config/db.js";
+import { RoomData } from "../routes/types/routeTypes.js";
 import { EntityModel } from "./entitiesModel.js";
 
 const database = new EntityModel();
 
 export class InGameModel {
-  async create(dataRequest, creatorId) {
+  async create(dataRequest : RoomData) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
     const playersCollection = db.collection("Players");

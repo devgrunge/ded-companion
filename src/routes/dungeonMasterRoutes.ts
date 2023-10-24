@@ -1,16 +1,19 @@
 import { FastifyInstance } from "fastify/types/instance.js";
 import { EntityModel } from "../models/entitiesModel.js";
 import { validateToken } from "../services/auth.js";
+import { DmData, RouteInterface } from "./types/routeTypes.js";
+import { FastifyRequest } from "fastify/types/request.js";
+import { FastifyReply } from "fastify/types/reply.js";
 
 const database = new EntityModel();
 
-export const dungeonMasterRoutes = async(server : FastifyInstance) => {
-  server.post(
+export const dungeonMasterRoutes = async (server: FastifyInstance) => {
+  server.post<RouteInterface>(
     "/dungeon-master",
     {
       preHandler: [validateToken],
     },
-    async (request, reply) => {
+    async (request: FastifyRequest, reply: FastifyReply) => {
       const body = request.body;
 
       try {
@@ -33,7 +36,7 @@ export const dungeonMasterRoutes = async(server : FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request, reply) => {
+    async (request: FastifyRequest, reply: FastifyReply) => {
       const search = request.query.search;
       try {
         const data = await database.list(search, "dungeon_master");
@@ -52,16 +55,12 @@ export const dungeonMasterRoutes = async(server : FastifyInstance) => {
     },
     async (request, reply) => {
       const dmId = request.params.id;
-      const body = request.body;
+      const body = request.body as DmData;
 
       try {
-        await database.update(
-          dmId,
-          {
-            dm_name: body.dm_name,
-          },
-          "dungeon_master"
-        );
+        await database.update(dmId, {
+          dm_name: body.dm_name,
+        });
         return reply.status(204).send();
       } catch (error) {
         console.error("Error updating Dungeon master:", error);
@@ -88,4 +87,4 @@ export const dungeonMasterRoutes = async(server : FastifyInstance) => {
       }
     }
   );
-}
+};

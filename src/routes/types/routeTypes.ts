@@ -23,10 +23,22 @@ export interface CharacterParams {
 export interface IReply {
   200: { success: boolean };
   201: { created: string | WithId<Document> };
-  204: { updated: string }
+  204: { updated: string };
   302: { url: string };
   "4xx": { error: string };
   500: { error: string };
+}
+
+export interface DmData {
+  id: string;
+  dm_name: string;
+}
+
+export interface RoomData {
+  room_id: string;
+  room_name: string;
+  inviteCode: string;
+  players: [];
 }
 
 export interface CharacterData {
@@ -45,6 +57,7 @@ export interface CharacterData {
   hitpoints: number;
   armor_class: number;
   initiative: number;
+  owner?: string;
 }
 export interface CharacterRequest extends FastifyRequest {
   user: { email: string };

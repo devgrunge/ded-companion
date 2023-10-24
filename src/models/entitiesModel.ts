@@ -2,15 +2,17 @@ import { randomUUID } from "node:crypto";
 import { nanoid } from "nanoid";
 import { mongoClient } from "../config/db.js";
 import { LoginModel } from "./loginModel.js";
+import { CharacterData } from "../routes/types/routeTypes.js";
 
 const database = new LoginModel();
 
 export class EntityModel {
-  async list(ownerEmail) {
-    const db = mongoClient.db("dndcompanion");
-    const collection = db.collection("Players");
-
+  async list(ownerEmail: string) {
     try {
+      await mongoClient.connect();
+      const db = mongoClient.db("dndcompanion");
+      const collection = db.collection("Players");
+
       const player = await collection.findOne({ email: ownerEmail });
 
       if (player && player.characters) {
@@ -20,11 +22,14 @@ export class EntityModel {
       }
     } catch (error) {
       throw error;
+    } finally {
+      mongoClient.close();
     }
   }
 
-  async create(email, characterData) {
+  async create(email: string, characterData: CharacterData) {
     try {
+      await mongoClient.connect();
       const player = await database.getUserInfo(email);
 
       if (!player) {
@@ -53,59 +58,65 @@ export class EntityModel {
     } catch (error) {
       console.error("Error creating character:", error);
       throw error;
+    } finally {
+      mongoClient.close();
     }
   }
 
-  async update(id, dataRequest) {
+  async update(id: string, dataRequest: CharacterData) {
     try {
-      const db = MongoClient.db("dndcompanion");
+      await mongoClient.connect();
+      const db = mongoClient.db("dndcompanion");
       const collection = db.collection("Players");
 
-      const currentUserEmail = dataRequest.owner; // Get the owner's email from the request data
+      const currentUserEmail = dataRequest.owner;
 
-      // Use the email to find the player document
       const player = await collection.findOne({ email: currentUserEmail });
 
       if (player && player.characters) {
-        const updatedCharacters = player.characters.map((character) => {
-          if (character.id === id) {
-            return {
-              id,
-              name: dataRequest.name,
-              level: dataRequest.level,
-              class: dataRequest.class,
-              attributes: {
-                for: dataRequest.attributes.for,
-                dex: dataRequest.attributes.dex,
-                con: dataRequest.attributes.con,
-                int: dataRequest.attributes.int,
-                wis: dataRequest.attributes.wis,
-                car: dataRequest.attributes.car,
-              },
-              hitpoints: dataRequest.hitpoints,
-              armor_class: dataRequest.armor_class,
-            };
+        const updatedCharacters = player.characters.map(
+          (character: CharacterData) => {
+            if (character.id === id) {
+              return {
+                id,
+                name: dataRequest.name,
+                level: dataRequest.level,
+                class: dataRequest.class,
+                attributes: {
+                  for: dataRequest.attributes.for,
+                  dex: dataRequest.attributes.dex,
+                  con: dataRequest.attributes.con,
+                  int: dataRequest.attributes.int,
+                  wis: dataRequest.attributes.wis,
+                  car: dataRequest.attributes.car,
+                },
+                hitpoints: dataRequest.hitpoints,
+                armor_class: dataRequest.armor_class,
+              };
+            }
+            return character;
           }
-          return character; // Return unchanged characters
-        });
+        );
 
-        // Update the characters array in the player document
         await collection.updateOne(
           { email: currentUserEmail },
           { $set: { characters: updatedCharacters } }
         );
 
-        return true; // Update successful
+        return true;
       } else {
-        return false; // Character not found or unauthorized
+        return false;
       }
     } catch (error) {
-      throw error; // Handle the error appropriately in your route
+      throw error;
+    } finally {
+      mongoClient.close();
     }
   }
 
-  async delete(id, ownerEmail) {
+  async delete(id: string, ownerEmail: string) {
     try {
+      await mongoClient.connect();
       const db = mongoClient.db("dndcompanion");
       const collection = db.collection("Players");
 
@@ -113,7 +124,7 @@ export class EntityModel {
 
       if (player && player.characters) {
         const updatedCharacters = player.characters.filter(
-          (character) => character.id !== id
+          (character: CharacterData) => character.id !== id
         );
 
         await collection.updateOne(
@@ -127,27 +138,33 @@ export class EntityModel {
       }
     } catch (error) {
       throw error;
+    } finally {
+      mongoClient.close();
     }
   }
 
-  async retrievePlayerData(playerId) {
-    const db = mongoClient.db("dndcompanion");
-    const playersCollection = db.collection("Players");
-
+  async retrievePlayerData(playerId: string) {
     try {
+      await mongoClient.connect();
+      const db = mongoClient.db("dndcompanion");
+      const playersCollection = db.collection("Players");
+
       const player = await playersCollection.findOne({ id: playerId });
-      console.log("the player",player)
+
       return player;
     } catch (error) {
       throw error;
+    } finally {
+      mongoClient.close();
     }
   }
 
-  async fetchCharacterData(playerId, characterId) {
-    const db = mongoClient.db("dndcompanion");
-    const playersCollection = db.collection("Players");
-
+  async fetchCharacterData(playerId: string, characterId: string) {
     try {
+      await mongoClient.connect();
+      const db = mongoClient.db("dndcompanion");
+      const playersCollection = db.collection("Players");
+
       const player = await playersCollection.findOne({ id: playerId });
 
       if (!player || !player.characters) {
@@ -155,12 +172,14 @@ export class EntityModel {
       }
 
       const character = player.characters.find(
-        (char) => char.id === characterId
+        (char: { id: string }) => char.id === characterId
       );
 
       return character;
     } catch (error) {
       throw error;
+    } finally {
+      mongoClient.close();
     }
   }
 }
