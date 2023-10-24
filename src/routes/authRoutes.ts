@@ -1,10 +1,21 @@
+import { FastifyInstance } from 'fastify';
 import { jwtAuth, validateToken } from "../services/auth.js";
 import { LoginModel } from "../models/loginModel.js";
 import bcrypt from "bcrypt";
 
 const database = new LoginModel();
 
-export async function authRoutes(server) {
+export const authRoutes = async(server : FastifyInstance) => {
+  server.get("/", async (request, reply) => {
+    try {
+      reply
+        .status(200)
+        .send({ message: "Welcome to dnd battle companion app" });
+    } catch (error) {
+      reply.status(500).send("Internal server error");
+    }
+  });
+
   server.post("/register", async (request, reply) => {
     try {
       const { email, password, name } = request.body;
@@ -47,29 +58,28 @@ export async function authRoutes(server) {
       return reply.status(400).send("Error logging: ", error);
     }
   });
-  
+
   server.delete(
-  "/users/:id",
-  {
-    preHandler: [validateToken],
-  },
-  async (request, reply) => {
-    try {
-      const userId = request.params.id;
-      console.log("userId: ",userId)
+    "/users/:id",
+    {
+      preHandler: [validateToken],
+    },
+    async (request, reply) => {
+      try {
+        const userId = request.params.id;
+        console.log("userId: ", userId);
 
-      const success = await database.deleteUser(userId);
+        const success = await database.deleteUser(userId);
 
-      if (success) {
-        return reply.status(204).send("User deleted successfully");
-      } else {
-        return reply.status(404).send("User not found or unauthorized");
+        if (success) {
+          return reply.status(204).send("User deleted successfully");
+        } else {
+          return reply.status(404).send("User not found or unauthorized");
+        }
+      } catch (error) {
+        console.error("Error deleting user: ", error);
+        return reply.status(500).send("Internal Server Error");
       }
-    } catch (error) {
-      console.error("Error deleting user: ", error);
-      return reply.status(500).send("Internal Server Error");
     }
-  }
-);
-
+  );
 }

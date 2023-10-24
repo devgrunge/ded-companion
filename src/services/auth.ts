@@ -1,4 +1,4 @@
-import { LoginModel } from "../models/loginModel.js";
+import { LoginModel } from "../models/loginModel.ts";
 import bcrypt from "bcrypt";
 import Jwt from "jsonwebtoken";
 import "dotenv/config";

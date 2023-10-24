@@ -1,3 +1,4 @@
+import { FastifyInstance } from "fastify/types/instance.js";
 import { randomUUID } from "node:crypto";
 import { EntityModel } from "../models/entitiesModel.js";
 import { InGameModel } from "../models/inGameModel.js";
@@ -7,7 +8,7 @@ import { nanoid } from "nanoid";
 const database = new EntityModel();
 const inGameDatabase = new InGameModel();
 
-export const roomRoutes = async (server) => {
+export const roomRoutes = async (server: FastifyInstance) => {
   server.post(
     "/rooms",
     {

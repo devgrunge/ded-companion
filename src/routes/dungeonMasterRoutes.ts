@@ -1,9 +1,10 @@
+import { FastifyInstance } from "fastify/types/instance.js";
 import { EntityModel } from "../models/entitiesModel.js";
 import { validateToken } from "../services/auth.js";
 
 const database = new EntityModel();
 
-export async function dungeonMasterRoutes(server) {
+export const dungeonMasterRoutes = async(server : FastifyInstance) => {
   server.post(
     "/dungeon-master",
     {
