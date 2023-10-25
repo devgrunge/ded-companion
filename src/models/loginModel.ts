@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
 import { mongoClient } from "../config/db.js";
+import { PlayerParams } from "../routes/types/routeTypes.js";
 
 export class LoginModel {
-  async createAccount(email, password, name) {
+  async createAccount({ email, password, name }: PlayerParams) {
     const dataId = randomUUID();
     const db = mongoClient.db("dndcompanion");
     const collection = db.collection("Players");
@@ -14,7 +15,7 @@ export class LoginModel {
       password: password,
       characters: [],
       isDm: false,
-      theme: "default"
+      theme: "default",
     };
 
     try {
@@ -30,7 +31,7 @@ export class LoginModel {
     }
   }
 
-  async getUserInfo(email) {
+  async getUserInfo(email: string) {
     const db = mongoClient.db("dndcompanion");
     const collection = db.collection("Players");
 
@@ -41,7 +42,7 @@ export class LoginModel {
       throw error;
     }
   }
-  async deleteUser(userId) {
+  async deleteUser(userId: string) {
     const db = mongoClient.db("dndcompanion");
     const collection = db.collection("Players");
 

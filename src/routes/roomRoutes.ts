@@ -4,9 +4,15 @@ import { EntityModel } from "../models/entitiesModel.js";
 import { InGameModel } from "../models/inGameModel.js";
 import { validateToken } from "../services/auth.js";
 import { nanoid } from "nanoid";
-import { RoomData, RouteInterface } from "./types/routeTypes.js";
+import {
+  IRequest,
+  RequestParams,
+  RoomData,
+  RoomRequest,
+  RouteInterface,
+} from "./types/routeTypes.js";
+import { FastifyRequest, FastifyReply } from "fastify";
 
-const database = new EntityModel();
 const inGameDatabase = new InGameModel();
 
 export const roomRoutes = async (server: FastifyInstance) => {
@@ -15,8 +21,8 @@ export const roomRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request, reply) => {
-      const body = request.body;
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const body: RoomData = request.body as RoomData;
       const roomId = randomUUID();
       const inviteCode = nanoid(4);
 
@@ -28,7 +34,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
           players: [],
         });
 
-        return reply.status(201).send({ created: "Room created sucessfuly" });
+        return reply.status(201).send({ created: createdRoom });
       } catch (error) {
         console.error("Error creating room:", error);
         reply.status(500).send({ error: "Internal server error" });
@@ -36,13 +42,13 @@ export const roomRoutes = async (server: FastifyInstance) => {
     }
   );
 
-  server.get(
+  server.get<RouteInterface>(
     "/rooms/:inviteCode",
     {
       preHandler: [validateToken],
     },
     async (request, reply) => {
-      const inviteCode = request.params.inviteCode;
+      const inviteCode = (request as RoomRequest).params.inviteCode;
 
       try {
         const room = await inGameDatabase.getRoomByInviteCode(inviteCode);
@@ -52,10 +58,10 @@ export const roomRoutes = async (server: FastifyInstance) => {
           return;
         }
 
-        return reply.status(200).send(room);
+        return reply.status(200).send({ success: "Room created sucessfully" });
       } catch (error) {
         console.error("Error getting room:", error);
-        reply.status(500).send("Internal server error");
+        reply.status(500).send({ error: "Internal server error" });
       }
     }
   );
@@ -65,9 +71,9 @@ export const roomRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request, reply) => {
-      const roomId = request.params.id;
-      const body = request.body;
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const roomId = (request as RoomRequest).params.id;
+      const body: RoomData = request.body as RoomData;
 
       console.log("roomid: ", roomId);
       try {
@@ -85,7 +91,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
         reply.status(204).send({ updated: "Room updated sucessfully" });
       } catch (error) {
         console.error("Error updating Room:", error);
-        reply.status(500).send("Internal server error");
+        reply.status(500).send({ error: "Internal server error" });
       }
     }
   );
@@ -96,7 +102,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
       preHandler: [validateToken],
     },
     async (request, reply) => {
-      const roomId = request.params.id;
+      const roomId: string = (request as RoomRequest).params.id;
 
       try {
         const result = await inGameDatabase.deleteRoom(roomId);
@@ -121,9 +127,9 @@ export const roomRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request, reply) => {
+    async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const { entity_id, room_id, character_id } = request.body;
+        const { entity_id, room_id, character_id } = request.body as RoomData;
 
         const roomExists = await inGameDatabase.roomExists(room_id);
         if (!roomExists) {
@@ -159,20 +165,22 @@ export const roomRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request, reply) => {
+    async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const body = request.body;
+        const body = request.body as RoomRequest;
 
         const room = await inGameDatabase.leaveRoom(
           body.room_id,
-          body.character_id
+          body.character_id as string
         );
 
         if (!room) {
           return reply.status(404).send({ error: "Room not found" });
         }
 
-        return reply.status(204).send("Character deleted sucessfully");
+        return reply
+          .status(204)
+          .send({ updated: "Character deleted sucessfully" });
       } catch (error) {
         console.error("Error deleting character from room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });
@@ -185,9 +193,9 @@ export const roomRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request, reply) => {
+    async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const roomId = request.params.room_id;
+        const roomId = (request as RoomRequest).params.room_id;
 
         const playersInRoom = await inGameDatabase.getPlayersInRoom(roomId);
 
@@ -206,13 +214,12 @@ export const roomRoutes = async (server: FastifyInstance) => {
     },
     async (request, reply) => {
       try {
-        const roomId = request.params.room_id;
+        const roomId = (request as RoomRequest).params.room_id;
 
-        const dungeonMastersInRoom = await database.getDungeonMastersInRoom(
-          roomId
-        );
+        const dungeonMastersInRoom =
+          await inGameDatabase.getDungeonMastersInRoom(roomId);
 
-        return reply.status(200).send(dungeonMastersInRoom);
+        return reply.status(200).send({ success: dungeonMastersInRoom });
       } catch (error) {
         console.error("Error fetching dungeon masters in room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });

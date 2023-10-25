@@ -11,8 +11,38 @@ export interface IHeaders {
   "h-Custom": string;
 }
 
+export interface PlayerParams {
+  id: string;
+  name: string;
+  email: string;
+  password: string;
+  characters: [];
+  isDm: boolean;
+}
+
 export interface IRequest {
   email?: string;
+}
+
+export interface RouteInterface {
+  Request: FastifyRequest | IRequest | unknown;
+  Reply: FastifyReply | IReply;
+}
+
+export interface RequestParams extends RouteInterface {
+  params: {
+    id: string | unknown;
+  };
+}
+
+export interface RoomRequest extends FastifyRequest {
+  room_id: string;
+  character_id?: string;
+  params: {
+    [x: string]: any;
+    id: string;
+    inviteCode: string;
+  };
 }
 
 export interface CharacterParams {
@@ -21,7 +51,7 @@ export interface CharacterParams {
 }
 
 export interface IReply {
-  200: { success: boolean };
+  200: { success: boolean | void | string };
   201: { created: string | WithId<Document> };
   204: { updated: string };
   302: { url: string };
@@ -39,6 +69,8 @@ export interface RoomData {
   room_name: string;
   inviteCode: string;
   players: [];
+  character_id?: string;
+  entity_id?: string | undefined;
 }
 
 export interface CharacterData {
@@ -58,12 +90,4 @@ export interface CharacterData {
   armor_class: number;
   initiative: number;
   owner?: string;
-}
-export interface CharacterRequest extends FastifyRequest {
-  user: { email: string };
-}
-
-export interface RouteInterface {
-  Request: FastifyRequest | IRequest;
-  Reply: FastifyReply | IReply;
 }

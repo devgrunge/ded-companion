@@ -1,7 +1,7 @@
 import { fastify } from "fastify";
 import { characterRoutes } from "./src/routes/characterRoutes.ts";
 import { roomRoutes } from "./src/routes/roomRoutes.ts";
-import { dungeonMasterRoutes } from "./src/routes/dungeonMasterRoutes.ts";
+// import { dungeonMasterRoutes } from "./src/routes/dungeonMasterRoutes.ts";
 import { authRoutes } from "./src/routes/authRoutes.ts";
 import "dotenv/config";
 
@@ -10,7 +10,7 @@ const server = fastify();
 authRoutes(server);
 characterRoutes(server);
 roomRoutes(server);
-dungeonMasterRoutes(server);
+// dungeonMasterRoutes(server);
 
 server.listen({ port: 3333 }, (err, address) => {
   if (err) {

@@ -1,11 +1,16 @@
-import { FastifyInstance } from 'fastify';
+import { FastifyInstance } from "fastify";
 import { jwtAuth, validateToken } from "../services/auth.js";
 import { LoginModel } from "../models/loginModel.js";
 import bcrypt from "bcrypt";
+import {
+  PlayerParams,
+  RequestParams,
+  RouteInterface,
+} from "./types/routeTypes.js";
 
 const database = new LoginModel();
 
-export const authRoutes = async(server : FastifyInstance) => {
+export const authRoutes = async (server: FastifyInstance) => {
   server.get("/", async (request, reply) => {
     try {
       reply
@@ -18,7 +23,7 @@ export const authRoutes = async(server : FastifyInstance) => {
 
   server.post("/register", async (request, reply) => {
     try {
-      const { email, password, name } = request.body;
+      const { email, password, name } = request.body as PlayerParams;
 
       if (!email || !password || !name) {
         return reply
@@ -44,7 +49,7 @@ export const authRoutes = async(server : FastifyInstance) => {
 
   server.post("/login", async (request, reply) => {
     try {
-      const { email, password } = request.body;
+      const { email, password } = request.body as PlayerParams;
 
       if (!email || !password) {
         return reply.status(400).send("Email and password are required");
@@ -55,31 +60,35 @@ export const authRoutes = async(server : FastifyInstance) => {
       checkAuth ? reply.status(200).send({ message: checkAuth }) : false;
     } catch (error) {
       console.error("Error logging into app: ", error);
-      return reply.status(400).send("Error logging: ", error);
+      return reply.status(400).send({ error: "Error logging: " });
     }
   });
 
-  server.delete(
+  server.delete<RouteInterface>(
     "/users/:id",
     {
       preHandler: [validateToken],
     },
     async (request, reply) => {
       try {
-        const userId = request.params.id;
+        const userId = (request as unknown as RequestParams).params.id;
         console.log("userId: ", userId);
 
         const success = await database.deleteUser(userId);
 
         if (success) {
-          return reply.status(204).send("User deleted successfully");
+          return reply
+            .status(204)
+            .send({ updated: "User deleted successfully" });
         } else {
-          return reply.status(404).send("User not found or unauthorized");
+          return reply
+            .status(404)
+            .send({ error: "User not found or unauthorized" });
         }
       } catch (error) {
         console.error("Error deleting user: ", error);
-        return reply.status(500).send("Internal Server Error");
+        return reply.status(500).send({ error: "Internal Server Error" });
       }
     }
   );
-}
+};

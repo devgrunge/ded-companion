@@ -159,7 +159,10 @@ export class EntityModel {
     }
   }
 
-  async fetchCharacterData(playerId: string, characterId: string) {
+  async fetchCharacterData(
+    playerId: string | undefined,
+    characterId: string | undefined
+  ) {
     try {
       await mongoClient.connect();
       const db = mongoClient.db("dndcompanion");

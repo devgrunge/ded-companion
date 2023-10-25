@@ -5,10 +5,9 @@ import { EntityModel } from "./entitiesModel.js";
 const database = new EntityModel();
 
 export class InGameModel {
-  async create(dataRequest : RoomData) {
+  async create(dataRequest: RoomData) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
-    const playersCollection = db.collection("Players");
 
     try {
       const result = await roomsCollection.insertOne(dataRequest);
@@ -19,7 +18,7 @@ export class InGameModel {
     }
   }
 
-  async setDungeonMaster(playerId) {
+  async setDungeonMaster(playerId: string) {
     const db = mongoClient.db("dndcompanion");
     const playersCollection = db.collection("Players");
 
@@ -46,7 +45,7 @@ export class InGameModel {
     }
   }
 
-  async updateRoom(roomId, updatedData) {
+  async updateRoom(roomId: string, updatedData) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -63,7 +62,7 @@ export class InGameModel {
     }
   }
 
-  async deleteRoom(roomId) {
+  async deleteRoom(roomId: string) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -75,7 +74,7 @@ export class InGameModel {
       throw error;
     }
   }
-  async roomExists(roomId) {
+  async roomExists(roomId: string) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -87,7 +86,10 @@ export class InGameModel {
     }
   }
 
-  async characterBelongsToPlayer(playerId, characterId) {
+  async characterBelongsToPlayer(
+    playerId: string | undefined,
+    characterId: string | undefined
+  ) {
     const db = mongoClient.db("dndcompanion");
     const playersCollection = db.collection("Players");
 
@@ -99,7 +101,7 @@ export class InGameModel {
       }
 
       const character = player.characters.find(
-        (char) => char.id === characterId
+        (char: any) => char.id === characterId
       );
       return character !== undefined;
     } catch (error) {
@@ -107,7 +109,11 @@ export class InGameModel {
     }
   }
 
-  async enterRoom(playerId, roomId, characterId) {
+  async enterRoom(
+    playerId: string | undefined,
+    roomId: string | undefined,
+    characterId: string | undefined
+  ) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -129,7 +135,7 @@ export class InGameModel {
       }
 
       const existingPlayerIndex = room.players.findIndex(
-        (player) => player.id === playerId
+        (player: any) => player.id === playerId
       );
 
       if (existingPlayerIndex !== -1) {
@@ -155,7 +161,7 @@ export class InGameModel {
     }
   }
 
-  async leaveRoom(roomId, characterId) {
+  async leaveRoom(roomId: string, characterId: string) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -188,4 +194,8 @@ export class InGameModel {
       throw error;
     }
   }
+
+  async getPlayersInRoom(roomId: string) {}
+
+  async getDungeonMastersInRoom(roomId: string) {}
 }
