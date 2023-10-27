@@ -1,0 +1,110 @@
+import { FastifyInstance, FastifyReply } from "fastify";
+import { jwtAuth, validateToken } from "../services/auth.js";
+import { LoginModel } from "../models/loginModel.js";
+import bcrypt from "bcrypt";
+import {
+  PlayerParams,
+  RequestParams,
+  RouteInterface,
+} from "./types/routeTypes.js";
+
+const database = new LoginModel();
+
+export const authRoutes = async (server: FastifyInstance) => {
+  server.get<RouteInterface>("/", async (request, reply) => {
+    try {
+      reply
+        .status(200)
+        .send({ success: "Welcome to dnd battle companion app" });
+    } catch (error) {
+      reply.status(500).send({ error: "Internal server error" });
+    }
+  });
+
+  server.post<RouteInterface>(
+    "/register",
+    async (request, reply: FastifyReply) => {
+      try {
+        const { email, password, name } = request.body as PlayerParams;
+
+        const playerData: PlayerParams = { email, password, name };
+
+        if (!email || !password || !name) {
+          return reply
+            .status(400)
+            .send({ error: "Email and password and name are required" });
+        }
+
+        const userExists = await database.getUserInfo(email);
+
+        if (userExists !== null && userExists.length > 0) {
+          return reply
+            .status(400)
+            .send({ error: "User email already registered" });
+        }
+        const encryptedPassword = bcrypt.hashSync(password, 10);
+
+        if (encryptedPassword !== password) {
+          reply.status(400).send({ error: "Wrong password" });
+        }
+
+        await database.createAccount(playerData);
+
+        return reply.status(201).send({ success: "Sucess creating player" });
+      } catch (error) {
+        console.log("Error creating new user: ", error);
+        return reply.status(500).send({ error: "Internal Server Error" });
+      }
+    }
+  );
+
+  server.post<RouteInterface>(
+    "/login",
+    async (request, reply: FastifyReply) => {
+      try {
+        const { email, password } = request.body as PlayerParams;
+
+        if (!email || !password) {
+          return reply
+            .status(400)
+            .send({ error: "Email and password are required" });
+        }
+
+        const checkAuth = await jwtAuth(email, password);
+
+        checkAuth ? reply.status(200).send({ message: checkAuth }) : false;
+      } catch (error) {
+        console.error("Error logging into app: ", error);
+        return reply.status(400).send({ error: "Error logging: " });
+      }
+    }
+  );
+
+  server.delete<RouteInterface>(
+    "/users/:id",
+    {
+      preHandler: [validateToken],
+    },
+    async (request, reply) => {
+      try {
+        const userId = (request as unknown as RequestParams).params.id;
+        console.log("userId: ", userId);
+
+        const success = await database.deleteUser(userId);
+
+        if (success) {
+          return reply
+            .status(204)
+            .send({ updated: "User deleted successfully" });
+        } else {
+          return reply
+            .status(404)
+            .send({ error: "User not found or unauthorized" });
+        }
+      } catch (error) {
+        console.error("Error deleting user: ", error);
+        return reply.status(500).send({ error: "Internal Server Error" });
+      }
+    }
+  );
+};

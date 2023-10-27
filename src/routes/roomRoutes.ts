@@ -1,71 +1,79 @@
+import { FastifyInstance } from "fastify/types/instance.js";
 import { randomUUID } from "node:crypto";
-import { EntityModel } from "../models/entitiesModel.js";
 import { InGameModel } from "../models/inGameModel.js";
 import { validateToken } from "../services/auth.js";
 import { nanoid } from "nanoid";
+import {
+  IRequest,
+  RequestParams,
+  RoomData,
+  RoomRequest,
+  RouteInterface,
+} from "./types/routeTypes.js";
+import { FastifyRequest, FastifyReply } from "fastify";
+import { ObjectId } from "mongodb";
 
-const database = new EntityModel();
 const inGameDatabase = new InGameModel();
 
-export const roomRoutes = async (server) => {
-  server.post(
+export const roomRoutes = async (server: FastifyInstance) => {
+  server.post<RouteInterface>(
     "/rooms",
     {
       preHandler: [validateToken],
     },
-    async (request, reply) => {
-      const body = request.body;
+    async (request, reply: FastifyReply) => {
+      const body: RoomData = request.body as RoomData;
       const roomId = randomUUID();
       const inviteCode = nanoid(4);
 
       try {
-        const createdRoom = await inGameDatabase.create({
+        const createdRoom: Boolean = await inGameDatabase.create({
           room_id: roomId,
           room_name: body.room_name,
           inviteCode: inviteCode,
           players: [],
         });
 
-        return reply.status(201).send(createdRoom);
+        return reply.status(201).send({ created: createdRoom });
       } catch (error) {
         console.error("Error creating room:", error);
-        reply.status(500).send("Internal server error");
+        reply.status(500).send({ error: "Internal server error" });
       }
     }
   );
 
-  server.get(
+  server.get<RouteInterface>(
     "/rooms/:inviteCode",
     {
       preHandler: [validateToken],
     },
     async (request, reply) => {
-      const inviteCode = request.params.inviteCode;
+      const inviteCode = (request as RoomRequest).params.inviteCode;
 
       try {
         const room = await inGameDatabase.getRoomByInviteCode(inviteCode);
 
         if (!room) {
-          reply.status(404).send("Room not found");
+          reply.status(404).send({ error: "Room not found" });
           return;
         }
 
-        return reply.status(200).send(room);
+        return reply.status(200).send({ success: "Room created sucessfully" });
       } catch (error) {
         console.error("Error getting room:", error);
-        reply.status(500).send("Internal server error");
+        reply.status(500).send({ error: "Internal server error" });
       }
     }
   );
 
-  server.put(
+  server.put<RouteInterface>(
     "/rooms/:id",
     {
       preHandler: [validateToken],
     },
     async (request, reply) => {
-      const roomId = request.params.id;
-      const body = request.body;
+      const roomId = (request as RoomRequest).params.id;
+      const body: RoomData = request.body as RoomData;
 
       console.log("roomid: ", roomId);
       try {
@@ -76,31 +84,33 @@ export const roomRoutes = async (server) => {
         console.log("updated room", updatedRoom);
 
         if (!updatedRoom) {
-          reply.status(404).send("Room not found");
+          reply.status(404).send({ error: "Room not found" });
           return;
         }
 
-        reply.status(204).send("Room updated sucessfully");
+        reply.status(204).send({ updated: "Room updated sucessfully" });
       } catch (error) {
         console.error("Error updating Room:", error);
-        reply.status(500).send("Internal server error");
+        reply.status(500).send({ error: "Internal server error" });
       }
     }
   );
 
-  server.delete(
+  server.delete<RouteInterface>(
     "/rooms/:id",
     {
       preHandler: [validateToken],
     },
     async (request, reply) => {
-      const roomId = request.params.id;
+      const roomId: string = (request as RoomRequest).params.id;
 
       try {
         const result = await inGameDatabase.deleteRoom(roomId);
 
         if (result.deletedCount === 1) {
-          return reply.status(204).send("Room deleted Sucessfully");
+          return reply
+            .status(204)
+            .send({ updated: "Room deleted Sucessfully" });
         } else {
           return reply.status(404).send({ error: "Room not found" });
         }
@@ -112,14 +122,14 @@ export const roomRoutes = async (server) => {
   );
 
   // Handling relationship between rooms and players
-  server.post(
+  server.post<RouteInterface>(
     "/rooms/enter",
     {
       preHandler: [validateToken],
     },
-    async (request, reply) => {
+    async (request: FastifyRequest, reply: FastifyReply) => {
       try {
-        const { entity_id, room_id, character_id } = request.body;
+        const { entity_id, room_id, character_id } = request.body as RoomData;
 
         const roomExists = await inGameDatabase.roomExists(room_id);
         if (!roomExists) {
@@ -142,7 +152,7 @@ export const roomRoutes = async (server) => {
 
         return reply
           .status(201)
-          .send({ message: "Player has entered the room." });
+          .send({ created: "Player has entered the room." });
       } catch (error) {
         console.error("Error at entering this room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });
@@ -150,25 +160,27 @@ export const roomRoutes = async (server) => {
     }
   );
 
-  server.delete(
+  server.delete<RouteInterface>(
     "/rooms/leave",
     {
       preHandler: [validateToken],
     },
     async (request, reply) => {
       try {
-        const body = request.body;
+        const body = request.body as RoomRequest;
 
         const room = await inGameDatabase.leaveRoom(
           body.room_id,
-          body.character_id
+          body.character_id as string
         );
 
         if (!room) {
           return reply.status(404).send({ error: "Room not found" });
         }
 
-        return reply.status(204).send("Character deleted sucessfully");
+        return reply
+          .status(204)
+          .send({ updated: "Character deleted sucessfully" });
       } catch (error) {
         console.error("Error deleting character from room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });
@@ -176,14 +188,14 @@ export const roomRoutes = async (server) => {
     }
   );
 
-  server.get(
+  server.get<RouteInterface>(
     "/rooms/players/:room_id",
     {
       preHandler: [validateToken],
     },
-    async (request, reply) => {
+    async (request, reply: FastifyReply) => {
       try {
-        const roomId = request.params.room_id;
+        const roomId = (request as RoomRequest).params.room_id;
 
         const playersInRoom = await inGameDatabase.getPlayersInRoom(roomId);
 
@@ -195,20 +207,19 @@ export const roomRoutes = async (server) => {
     }
   );
 
-  server.get(
+  server.get<RouteInterface>(
     "/rooms/dungeon_masters/:room_id",
     {
       preHandler: [validateToken],
     },
     async (request, reply) => {
       try {
-        const roomId = request.params.room_id;
+        const roomId = (request as RoomRequest).params.room_id;
 
-        const dungeonMastersInRoom = await database.getDungeonMastersInRoom(
-          roomId
-        );
+        const dungeonMastersInRoom =
+          await inGameDatabase.getDungeonMastersInRoom(roomId);
 
-        return reply.status(200).send(dungeonMastersInRoom);
+        return reply.status(200).send({ success: dungeonMastersInRoom });
       } catch (error) {
         console.error("Error fetching dungeon masters in room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });

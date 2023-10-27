@@ -2,19 +2,17 @@
   "name": "dungeons-and-dragons-companion",
   "version": "1.0.1",
   "description": "An api to provide all necessary data to the dnd companion app!",
-  "main": "server.js",
+  "main": "server.ts",
   "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js",
-    "dev": "node --watch --no-warnings server.js"
+    "start": "node server.ts",
+    "dev": "nodemon --exec ts-node ./src/index.ts --project ./tsconfig.json"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@fastify/jwt": "^7.2.2",
-    "@types/jsonwebtoken": "^9.0.3",
     "bcrypt": "^5.1.1",
     "fastify": "^4.23.2",
     "jsonwebtoken": "^9.0.2",
@@ -22,8 +20,14 @@
     "nanoid": "^5.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20.8.6",
-    "dotenv": "^16.3.1"
+    "@fastify/jwt": "^7.2.2",
+    "@types/bcrypt": "^5.0.1",
+    "@types/jsonwebtoken": "^9.0.3",
+    "@types/node": "^20.8.9",
+    "dotenv": "^16.3.1",
+    "nodemon": "^3.0.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.2.2"
   },
   "engines": {
     "node": "18.12.1"

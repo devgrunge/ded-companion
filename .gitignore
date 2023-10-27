@@ -9,3 +9,4 @@ package-lock.json
 
 #Environment 
 .env
+tsconfig.json

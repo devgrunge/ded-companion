@@ -1,24 +1,28 @@
 import { mongoClient } from "../config/db.js";
-import { EntityModel } from "./entitiesModel.js";
+import { RoomData } from "../routes/types/routeTypes.js";
+import { CharacterModel } from "./characterModel.js";
+import { DmModel } from "../models/dmModel.ts"
 
-const database = new EntityModel();
+const characterDatabase = new CharacterModel();
+const dmDatabase = new DmModel()
 
 export class InGameModel {
-  async create(dataRequest, creatorId) {
+  async create(dataRequest: RoomData) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
-    const playersCollection = db.collection("Players");
 
     try {
       const result = await roomsCollection.insertOne(dataRequest);
 
-      return result.ops;
+      // todo: see if this method returns a correct data
+      console.log("result",result)
+      return result.acknowledged;
     } catch (error) {
       throw error;
     }
   }
 
-  async setDungeonMaster(playerId) {
+  async setDungeonMaster(playerId: string) {
     const db = mongoClient.db("dndcompanion");
     const playersCollection = db.collection("Players");
 
@@ -32,7 +36,7 @@ export class InGameModel {
     }
   }
 
-  async getRoomByInviteCode(inviteCode) {
+  async getRoomByInviteCode(inviteCode: string) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -45,7 +49,7 @@ export class InGameModel {
     }
   }
 
-  async updateRoom(roomId, updatedData) {
+  async updateRoom(roomId: string, updatedData: object) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -53,7 +57,7 @@ export class InGameModel {
       const result = await roomsCollection.findOneAndUpdate(
         { room_id: roomId },
         { $set: updatedData },
-        { returnOriginal: false }
+        { returnDocument: "after" }
       );
 
       return result;
@@ -62,7 +66,7 @@ export class InGameModel {
     }
   }
 
-  async deleteRoom(roomId) {
+  async deleteRoom(roomId: string) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -74,7 +78,7 @@ export class InGameModel {
       throw error;
     }
   }
-  async roomExists(roomId) {
+  async roomExists(roomId: string) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -86,7 +90,10 @@ export class InGameModel {
     }
   }
 
-  async characterBelongsToPlayer(playerId, characterId) {
+  async characterBelongsToPlayer(
+    playerId: string | undefined,
+    characterId: string | undefined
+  ) {
     const db = mongoClient.db("dndcompanion");
     const playersCollection = db.collection("Players");
 
@@ -98,7 +105,7 @@ export class InGameModel {
       }
 
       const character = player.characters.find(
-        (char) => char.id === characterId
+        (char: any) => char.id === characterId
       );
       return character !== undefined;
     } catch (error) {
@@ -106,12 +113,16 @@ export class InGameModel {
     }
   }
 
-  async enterRoom(playerId, roomId, characterId) {
+  async enterRoom(
+    playerId: string | undefined,
+    roomId: string | undefined,
+    characterId: string | undefined
+  ) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
     try {
-      const character = await database.fetchCharacterData(
+      const character = await characterDatabase.fetchCharacterData(
         playerId,
         characterId
       );
@@ -128,14 +139,12 @@ export class InGameModel {
       }
 
       const existingPlayerIndex = room.players.findIndex(
-        (player) => player.id === playerId
+        (player: any) => player.id === playerId
       );
 
       if (existingPlayerIndex !== -1) {
-        // Player already exists, update their character
         room.players[existingPlayerIndex].character = character;
       } else {
-        // Player doesn't exist, add them to the room
         room.players.push({
           id: playerId,
           character: character,
@@ -145,16 +154,16 @@ export class InGameModel {
       const updatedRoom = await roomsCollection.findOneAndUpdate(
         { room_id: roomId },
         { $set: { players: room.players } },
-        { returnOriginal: false }
+        { returnDocument: "after" }
       );
 
-      return updatedRoom.value;
+      return updatedRoom?.value;
     } catch (error) {
       throw error;
     }
   }
 
-  async leaveRoom(roomId, characterId) {
+  async leaveRoom(roomId: string, characterId: string) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -187,4 +196,8 @@ export class InGameModel {
       throw error;
     }
   }
+
+  async getPlayersInRoom(roomId: string) {}
+
+  async getDungeonMastersInRoom(roomId: string) {}
 }
