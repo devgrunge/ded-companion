@@ -1,12 +1,10 @@
-import { randomUUID } from "node:crypto";
-import { nanoid } from "nanoid";
 import { mongoClient } from "../config/db.js";
 import { LoginModel } from "./loginModel.js";
 import { CharacterData } from "../routes/types/routeTypes.js";
 
 const database = new LoginModel();
 
-export class EntityModel {
+export class CharacterModel {
   async list(ownerEmail: string) {
     try {
       await mongoClient.connect();

@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify/types/instance.js";
-import { EntityModel } from "../models/entitiesModel.js";
+import { CharacterModel } from "../models/characterModel.ts";
 import { validateToken } from "../services/auth.js";
 import { randomUUID } from "node:crypto";
 import { mongoClient } from "../config/db.js";
@@ -8,10 +8,9 @@ import {
   CharacterParams,
   RouteInterface,
 } from "./types/routeTypes.js";
-import { FastifyRequest } from "fastify/types/request.js";
 import { FastifyReply } from "fastify/types/reply.js";
 
-const database = new EntityModel();
+const database = new CharacterModel();
 
 export const characterRoutes = async (server: FastifyInstance) => {
   server.post<RouteInterface>(
@@ -19,7 +18,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply: FastifyReply) => {
       const params = request.params as CharacterParams;
       const body: CharacterData = request.body as CharacterData;
       const dataId = randomUUID();
@@ -144,7 +143,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const params = request.params as CharacterParams;
       const characterId = params.id;
       const ownerEmail = params.user.email;

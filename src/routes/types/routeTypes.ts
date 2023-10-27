@@ -12,12 +12,12 @@ export interface IHeaders {
 }
 
 export interface PlayerParams {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  characters: [];
-  isDm: boolean;
+  id?: string;
+  name?: string;
+  email?: string;
+  password?: string;
+  characters?: [];
+  isDm?: boolean;
 }
 
 export interface IRequest {
@@ -27,6 +27,15 @@ export interface IRequest {
 export interface RouteInterface {
   Request: FastifyRequest | IRequest | unknown;
   Reply: FastifyReply | IReply;
+}
+
+export interface DungeonMasterRequest extends RouteInterface {
+  Querystring: {
+    search?: string;
+  };
+  Params: {
+    id?: string | unknown;
+  };
 }
 
 export interface RequestParams extends RouteInterface {
@@ -60,8 +69,8 @@ export interface IReply {
 }
 
 export interface DmData {
-  id: string;
-  dm_name: string;
+  id?: string;
+  dm_name?: string | undefined;
 }
 
 export interface RoomData {

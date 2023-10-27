@@ -1,6 +1,5 @@
 import { FastifyInstance } from "fastify/types/instance.js";
 import { randomUUID } from "node:crypto";
-import { EntityModel } from "../models/entitiesModel.js";
 import { InGameModel } from "../models/inGameModel.js";
 import { validateToken } from "../services/auth.js";
 import { nanoid } from "nanoid";
@@ -12,6 +11,7 @@ import {
   RouteInterface,
 } from "./types/routeTypes.js";
 import { FastifyRequest, FastifyReply } from "fastify";
+import { ObjectId } from "mongodb";
 
 const inGameDatabase = new InGameModel();
 
@@ -21,13 +21,13 @@ export const roomRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply: FastifyReply) => {
       const body: RoomData = request.body as RoomData;
       const roomId = randomUUID();
       const inviteCode = nanoid(4);
 
       try {
-        const createdRoom: RoomData = await inGameDatabase.create({
+        const createdRoom: Boolean = await inGameDatabase.create({
           room_id: roomId,
           room_name: body.room_name,
           inviteCode: inviteCode,
@@ -71,7 +71,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       const roomId = (request as RoomRequest).params.id;
       const body: RoomData = request.body as RoomData;
 
@@ -165,7 +165,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       try {
         const body = request.body as RoomRequest;
 
@@ -193,7 +193,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply: FastifyReply) => {
       try {
         const roomId = (request as RoomRequest).params.room_id;
 

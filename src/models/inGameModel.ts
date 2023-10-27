@@ -1,8 +1,10 @@
 import { mongoClient } from "../config/db.js";
 import { RoomData } from "../routes/types/routeTypes.js";
-import { EntityModel } from "./entitiesModel.js";
+import { CharacterModel } from "./characterModel.js";
+import { DmModel } from "../models/dmModel.ts"
 
-const database = new EntityModel();
+const characterDatabase = new CharacterModel();
+const dmDatabase = new DmModel()
 
 export class InGameModel {
   async create(dataRequest: RoomData) {
@@ -12,7 +14,9 @@ export class InGameModel {
     try {
       const result = await roomsCollection.insertOne(dataRequest);
 
-      return result.ops;
+      // todo: see if this method returns a correct data
+      console.log("result",result)
+      return result.acknowledged;
     } catch (error) {
       throw error;
     }
@@ -32,7 +36,7 @@ export class InGameModel {
     }
   }
 
-  async getRoomByInviteCode(inviteCode) {
+  async getRoomByInviteCode(inviteCode: string) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -45,7 +49,7 @@ export class InGameModel {
     }
   }
 
-  async updateRoom(roomId: string, updatedData) {
+  async updateRoom(roomId: string, updatedData: object) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -53,7 +57,7 @@ export class InGameModel {
       const result = await roomsCollection.findOneAndUpdate(
         { room_id: roomId },
         { $set: updatedData },
-        { returnOriginal: false }
+        { returnDocument: "after" }
       );
 
       return result;
@@ -118,7 +122,7 @@ export class InGameModel {
     const roomsCollection = db.collection("Rooms");
 
     try {
-      const character = await database.fetchCharacterData(
+      const character = await characterDatabase.fetchCharacterData(
         playerId,
         characterId
       );
@@ -139,10 +143,8 @@ export class InGameModel {
       );
 
       if (existingPlayerIndex !== -1) {
-        // Player already exists, update their character
         room.players[existingPlayerIndex].character = character;
       } else {
-        // Player doesn't exist, add them to the room
         room.players.push({
           id: playerId,
           character: character,
@@ -152,10 +154,10 @@ export class InGameModel {
       const updatedRoom = await roomsCollection.findOneAndUpdate(
         { room_id: roomId },
         { $set: { players: room.players } },
-        { returnOriginal: false }
+        { returnDocument: "after" }
       );
 
-      return updatedRoom.value;
+      return updatedRoom?.value;
     } catch (error) {
       throw error;
     }

@@ -42,7 +42,7 @@ export class LoginModel {
       throw error;
     }
   }
-  async deleteUser(userId: string) {
+  async deleteUser(userId : unknown) {
     const db = mongoClient.db("dndcompanion");
     const collection = db.collection("Players");
 
