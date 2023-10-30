@@ -85,18 +85,19 @@ export interface RoomData {
 export interface CharacterData {
   id: string;
   name: string;
-  level: number;
-  class: string;
+  level?: number;
+  class?: string;
   attributes: {
-    for: number;
-    dex: number;
-    con: number;
-    int: number;
-    wis: number;
-    car: number;
+    str?: number;
+    dex?: number;
+    con?: number;
+    int?: number;
+    wis?: number;
+    car?: number;
   };
-  hitpoints: number;
-  armor_class: number;
-  initiative: number;
+  hitpoints?: number;
+  armor_class?: number;
+  initiative?: number;
   owner?: string;
+  isDm?: boolean;
 }

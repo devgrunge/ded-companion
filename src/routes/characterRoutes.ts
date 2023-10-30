@@ -1,14 +1,14 @@
-import { FastifyInstance } from "fastify/types/instance.js";
+import { FastifyInstance } from "fastify/types/instance.ts";
 import { CharacterModel } from "../models/characterModel.ts";
-import { validateToken } from "../services/auth.js";
+import { validateToken } from "../services/auth.ts";
 import { randomUUID } from "node:crypto";
-import { mongoClient } from "../config/db.js";
+import { mongoClient } from "../config/db.ts";
 import {
   CharacterData,
   CharacterParams,
   RouteInterface,
-} from "./types/routeTypes.js";
-import { FastifyReply } from "fastify/types/reply.js";
+} from "./types/routeTypes.ts";
+import { FastifyReply } from "fastify/types/reply.ts";
 
 const database = new CharacterModel();
 
@@ -29,12 +29,12 @@ export const characterRoutes = async (server: FastifyInstance) => {
           level: body.level,
           class: body.class,
           attributes: {
-            for: body.attributes.for,
+            str: body.attributes.str,
             dex: body.attributes.dex,
             con: body.attributes.con,
             int: body.attributes.int,
             wis: body.attributes.wis,
-            car: body.attributes.car,
+            car: body.attributes.car
           },
           hitpoints: body.hitpoints,
           armor_class: body.armor_class,
@@ -104,7 +104,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
                   level: body.level,
                   class: body.class,
                   attributes: {
-                    for: body.attributes.for,
+                    str: body.attributes.str,
                     dex: body.attributes.dex,
                     con: body.attributes.con,
                     int: body.attributes.int,

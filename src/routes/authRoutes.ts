@@ -42,11 +42,7 @@ export const authRoutes = async (server: FastifyInstance) => {
             .status(400)
             .send({ error: "User email already registered" });
         }
-        const encryptedPassword = bcrypt.hashSync(password, 10);
-
-        if (encryptedPassword !== password) {
-          reply.status(400).send({ error: "Wrong password" });
-        }
+        playerData.password = bcrypt.hashSync(password, 10);
 
         await database.createAccount(playerData);
 
@@ -76,6 +72,37 @@ export const authRoutes = async (server: FastifyInstance) => {
       } catch (error) {
         console.error("Error logging into app: ", error);
         return reply.status(400).send({ error: "Error logging: " });
+      }
+    }
+  );
+
+  server.put<RouteInterface>(
+    "/users/update",
+    {
+      preHandler: [validateToken],
+    },
+    async (request, reply: FastifyReply) => {
+      try {
+        const { email, password, name } = request.body as PlayerParams;
+
+        if (!email || !password || !name) {
+          return reply
+            .status(400)
+            .send({ error: "Email and password are required" });
+        }
+
+        const userExists = await database.getUserInfo(email);
+
+        if (!userExists) {
+          return reply.status(400).send({ errror: "User do not exists" });
+        }
+
+        const updatedUser = await database.updateUser(email, password, name);
+
+        return reply.status(204).send({ updated: updatedUser });
+      } catch (error) {
+        console.error("Error updating player data", error);
+        return reply.status(400).send({ error: "Error updatind Player" });
       }
     }
   );

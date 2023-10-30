@@ -1,4 +1,4 @@
-import Jwt from "jsonwebtoken";
+import Jwt, { JwtHeader } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { User } from "./authTypes.ts";
@@ -12,7 +12,7 @@ declare module "fastify" {
 }
 
 const database = new LoginModel();
-const appSecret = process.env.PRIVATE_KEY as any;
+const appSecret = process.env.PRIVATE_KEY as string;
 
 export const jwtAuth = async (
   email: string,
@@ -57,7 +57,7 @@ export const validateToken = async (
     const verifiedUser: User | unknown = Jwt.verify(
       token,
       appSecret
-    ) as unknown;
+    ) as JwtHeader;
 
     if (!token) {
       reply.status(401).send("Unauthorized: missing token");
