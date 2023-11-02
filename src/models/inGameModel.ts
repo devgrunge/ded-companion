@@ -1,22 +1,29 @@
+import { randomUUID } from "crypto";
 import { mongoClient } from "../config/db.js";
 import { RoomData } from "../routes/types/routeTypes.js";
 import { CharacterModel } from "./characterModel.js";
-import { DmModel } from "../models/dmModel.ts"
+import { nanoid } from "nanoid";
 
 const characterDatabase = new CharacterModel();
-const dmDatabase = new DmModel()
 
 export class InGameModel {
-  async create(dataRequest: RoomData) {
+  async createRoom(dataRequest: RoomData) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
-
     try {
-      const result = await roomsCollection.insertOne(dataRequest);
+      console.log("rendered")
+      const randomId = randomUUID();
+      const inviteCode = nanoid(4);
+      const room: RoomData = {
+        room_id: randomId,
+        room_name: dataRequest.room_name,
+        inviteCode: inviteCode,
+        players: [],
+      };
+      const result = await roomsCollection.insertOne(room);
 
       // todo: see if this method returns a correct data
-      console.log("result",result)
-      return result.acknowledged;
+      return result.insertedId;
     } catch (error) {
       throw error;
     }

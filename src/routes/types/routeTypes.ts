@@ -74,10 +74,10 @@ export interface DmData {
 }
 
 export interface RoomData {
-  room_id: string;
-  room_name: string;
-  inviteCode: string;
-  players: [];
+  room_id?: string;
+  room_name?: string;
+  inviteCode?: string;
+  players?: [];
   character_id?: string;
   entity_id?: string | undefined;
 }

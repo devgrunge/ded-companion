@@ -44,6 +44,7 @@ export const validateToken = async (
   done: (err?: Error) => void
 ) => {
   try {
+    console.log("midleware rendered")
     const token = request.headers.authorization
       ?.replace(/^Bearer/, "")
       .trim() as any;

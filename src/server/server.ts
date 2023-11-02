@@ -5,7 +5,6 @@ import { dungeonMasterRoutes } from "../routes/dungeonMasterRoutes.ts";
 import { authRoutes } from "../routes/authRoutes.ts";
 import "dotenv/config";
 
-console.log("Hey darling :)");
 const server = fastify();
 authRoutes(server);
 characterRoutes(server);

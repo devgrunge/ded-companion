@@ -1,17 +1,8 @@
 import { FastifyInstance } from "fastify/types/instance.js";
-import { randomUUID } from "node:crypto";
 import { InGameModel } from "../models/inGameModel.js";
 import { validateToken } from "../services/auth.js";
-import { nanoid } from "nanoid";
-import {
-  IRequest,
-  RequestParams,
-  RoomData,
-  RoomRequest,
-  RouteInterface,
-} from "./types/routeTypes.js";
+import { RoomData, RoomRequest, RouteInterface } from "./types/routeTypes.js";
 import { FastifyRequest, FastifyReply } from "fastify";
-import { ObjectId } from "mongodb";
 
 const inGameDatabase = new InGameModel();
 
@@ -22,26 +13,25 @@ export const roomRoutes = async (server: FastifyInstance) => {
       preHandler: [validateToken],
     },
     async (request, reply: FastifyReply) => {
-      const body: RoomData = request.body as RoomData;
-      const roomId = randomUUID();
-      const inviteCode = nanoid(4);
-
       try {
-        const createdRoom: Boolean = await inGameDatabase.create({
-          room_id: roomId,
+        const body: RoomData = request.body as RoomData;
+        const createdRoom: Object | null = await inGameDatabase.createRoom({
           room_name: body.room_name,
-          inviteCode: inviteCode,
-          players: [],
         });
 
-        return reply.status(201).send({ created: createdRoom });
+        if (createdRoom) {
+          console.log("Room was successfully created:", createdRoom);
+          return reply.status(201).send({ created: createdRoom });
+        } else {
+          console.log("Room creation failed.");
+          return reply.status(500).send({ error: "Room creation failed" });
+        }
       } catch (error) {
         console.error("Error creating room:", error);
         reply.status(500).send({ error: "Internal server error" });
       }
     }
   );
-
   server.get<RouteInterface>(
     "/rooms/:inviteCode",
     {
@@ -131,7 +121,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
       try {
         const { entity_id, room_id, character_id } = request.body as RoomData;
 
-        const roomExists = await inGameDatabase.roomExists(room_id);
+        const roomExists = await inGameDatabase.roomExists(room_id as string);
         if (!roomExists) {
           return reply.status(404).send({ error: "Room not found" });
         }
