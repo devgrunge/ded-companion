@@ -9,6 +9,7 @@ import {
   RouteInterface,
 } from "./types/routeTypes.ts";
 import { FastifyReply } from "fastify/types/reply.ts";
+import { FastifyRequest } from "fastify";
 
 const database = new CharacterModel();
 
@@ -18,8 +19,8 @@ export const characterRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request, reply: FastifyReply) => {
-      const params = request.params as CharacterParams;
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      // const params = request.params as CharacterParams;
       const body: CharacterData = request.body as CharacterData;
       const dataId = randomUUID();
       try {
@@ -34,14 +35,14 @@ export const characterRoutes = async (server: FastifyInstance) => {
             con: body.attributes.con,
             int: body.attributes.int,
             wis: body.attributes.wis,
-            car: body.attributes.car
+            car: body.attributes.car,
           },
           hitpoints: body.hitpoints,
           armor_class: body.armor_class,
           initiative: 0,
         };
 
-        const ownerEmail = params.user.email;
+        const ownerEmail = request.headers["user-email"] as string;
 
         const updatedPlayer = await database.create(ownerEmail, characterData);
 
@@ -59,8 +60,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
       preHandler: [validateToken],
     },
     async (request, reply) => {
-      const params = request.params as CharacterParams;
-      const currentUserEmail = params.user?.email;
+      const currentUserEmail = request.headers["user-email"] as string;
 
       if (currentUserEmail) {
         try {
@@ -86,7 +86,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
       const characterId = params.id;
       const body = request.body as CharacterData;
 
-      const currentUserEmail = params.user.email;
+      const currentUserEmail = request.headers["user-email"] as string;
 
       try {
         const db = mongoClient.db("dndcompanion");
@@ -146,7 +146,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
     async (request, reply) => {
       const params = request.params as CharacterParams;
       const characterId = params.id;
-      const ownerEmail = params.user.email;
+      const ownerEmail = request.headers["user-email"] as string;
 
       try {
         const success = await database.delete(characterId, ownerEmail);
