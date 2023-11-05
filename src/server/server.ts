@@ -1,6 +1,6 @@
 import { fastify } from "fastify";
 import { characterRoutes } from "../routes/characterRoutes.ts";
-import { roomRoutes } from "../routes/roomRoutes.ts";
+import { roomRoutes } from "../routes/roomRoutes.js";
 import { dungeonMasterRoutes } from "../routes/dungeonMasterRoutes.ts";
 import { authRoutes } from "../routes/authRoutes.ts";
 import "dotenv/config";

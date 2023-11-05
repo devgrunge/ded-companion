@@ -82,13 +82,11 @@ export const characterRoutes = async (server: FastifyInstance) => {
       preHandler: [validateToken],
     },
     async (request, reply) => {
-      const params = request.params as CharacterParams;
-      const characterId = params.id;
-      const body = request.body as CharacterData;
-
-      const currentUserEmail = request.headers["user-email"] as string;
-
       try {
+        const params = request.params as CharacterParams;
+        const characterId = params.id;
+        const body = request.body as CharacterData;
+        const currentUserEmail = request.headers["user-email"] as string;
         const db = mongoClient.db("dndcompanion");
         const collection = db.collection("Players");
 

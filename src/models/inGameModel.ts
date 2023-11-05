@@ -8,10 +8,10 @@ const characterDatabase = new CharacterModel();
 
 export class InGameModel {
   async createRoom(dataRequest: RoomData) {
-    const db = mongoClient.db("dndcompanion");
-    const roomsCollection = db.collection("Rooms");
     try {
-      console.log("rendered")
+      const db = mongoClient.db("dndcompanion");
+      const roomsCollection = db.collection("Rooms");
+      console.log("rendered");
       const randomId = randomUUID();
       const inviteCode = nanoid(4);
       const room: RoomData = {
@@ -19,11 +19,19 @@ export class InGameModel {
         room_name: dataRequest.room_name,
         inviteCode: inviteCode,
         players: [],
+        owner: dataRequest.owner,
       };
-      const result = await roomsCollection.insertOne(room);
 
-      // todo: see if this method returns a correct data
-      return result.insertedId;
+      const result = await roomsCollection.insertOne(room);
+      console.log("result ====>", result);
+
+      if (result.acknowledged && result.insertedId) {
+        console.log("Room was successfully created:", result.insertedId);
+        return result.insertedId;
+      } else {
+        console.log("Room creation failed.");
+        return null;
+      }
     } catch (error) {
       throw error;
     }
@@ -85,13 +93,17 @@ export class InGameModel {
       throw error;
     }
   }
-  async roomExists(roomId: string) {
-    const db = mongoClient.db("dndcompanion");
-    const roomsCollection = db.collection("Rooms");
-
+  async roomExists(roomId: string, currentUserEmail: string) {
     try {
-      const room = await roomsCollection.findOne({ room_id: roomId });
-      return room !== null;
+      console.log("email", currentUserEmail);
+      const db = mongoClient.db("dndcompanion");
+      const roomsCollection = db.collection("Rooms");
+      const room = await roomsCollection.findOne({
+        room_id: roomId,
+        owner: currentUserEmail,
+      });
+
+      return room;
     } catch (error) {
       throw error;
     }

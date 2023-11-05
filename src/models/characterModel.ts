@@ -81,7 +81,7 @@ export class CharacterModel {
                 level: dataRequest.level,
                 class: dataRequest.class,
                 attributes: {
-                  for: dataRequest.attributes.for,
+                  str: dataRequest.attributes.str,
                   dex: dataRequest.attributes.dex,
                   con: dataRequest.attributes.con,
                   int: dataRequest.attributes.int,
