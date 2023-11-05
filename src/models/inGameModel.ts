@@ -1,22 +1,37 @@
+import { randomUUID } from "crypto";
 import { mongoClient } from "../config/db.js";
 import { RoomData } from "../routes/types/routeTypes.js";
 import { CharacterModel } from "./characterModel.js";
-import { DmModel } from "../models/dmModel.ts"
+import { nanoid } from "nanoid";
 
 const characterDatabase = new CharacterModel();
-const dmDatabase = new DmModel()
 
 export class InGameModel {
-  async create(dataRequest: RoomData) {
-    const db = mongoClient.db("dndcompanion");
-    const roomsCollection = db.collection("Rooms");
-
+  async createRoom(dataRequest: RoomData) {
     try {
-      const result = await roomsCollection.insertOne(dataRequest);
+      const db = mongoClient.db("dndcompanion");
+      const roomsCollection = db.collection("Rooms");
+      console.log("rendered");
+      const randomId = randomUUID();
+      const inviteCode = nanoid(4);
+      const room: RoomData = {
+        room_id: randomId,
+        room_name: dataRequest.room_name,
+        inviteCode: inviteCode,
+        players: [],
+        owner: dataRequest.owner,
+      };
 
-      // todo: see if this method returns a correct data
-      console.log("result",result)
-      return result.acknowledged;
+      const result = await roomsCollection.insertOne(room);
+      console.log("result ====>", result);
+
+      if (result.acknowledged && result.insertedId) {
+        console.log("Room was successfully created:", result.insertedId);
+        return result.insertedId;
+      } else {
+        console.log("Room creation failed.");
+        return null;
+      }
     } catch (error) {
       throw error;
     }
@@ -78,13 +93,17 @@ export class InGameModel {
       throw error;
     }
   }
-  async roomExists(roomId: string) {
-    const db = mongoClient.db("dndcompanion");
-    const roomsCollection = db.collection("Rooms");
-
+  async roomExists(roomId: string, currentUserEmail: string) {
     try {
-      const room = await roomsCollection.findOne({ room_id: roomId });
-      return room !== null;
+      console.log("email", currentUserEmail);
+      const db = mongoClient.db("dndcompanion");
+      const roomsCollection = db.collection("Rooms");
+      const room = await roomsCollection.findOne({
+        room_id: roomId,
+        owner: currentUserEmail,
+      });
+
+      return room;
     } catch (error) {
       throw error;
     }

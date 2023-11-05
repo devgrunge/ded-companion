@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { mongoClient } from "../config/db.js";
 import { PlayerParams } from "../routes/types/routeTypes.js";
+import bcrypt from "bcrypt";
 
 export class LoginModel {
   async createAccount({ email, password, name }: PlayerParams) {
@@ -42,7 +43,7 @@ export class LoginModel {
       throw error;
     }
   }
-  async deleteUser(userId : unknown) {
+  async deleteUser(userId: unknown) {
     const db = mongoClient.db("dndcompanion");
     const collection = db.collection("Players");
 
@@ -55,6 +56,31 @@ export class LoginModel {
         return false;
       }
     } catch (error) {
+      throw error;
+    }
+  }
+
+  async updateUser(email: string, password: string, name: string) {
+    const db = mongoClient.db("dndcompanion");
+    const collection = db.collection("Players");
+
+    try {
+      const filter = { email };
+      const hashedPassword = await bcrypt.hash(password, 10); // Hash the new password
+
+      const updateData = {
+        $set: { password: hashedPassword, name },
+      };
+
+      const result = await collection.updateOne(filter, updateData);
+
+      if (result.modifiedCount === 1) {
+        return "User updated successfully";
+      } else {
+        return "User not updated";
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
       throw error;
     }
   }

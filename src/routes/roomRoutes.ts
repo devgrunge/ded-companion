@@ -1,17 +1,8 @@
 import { FastifyInstance } from "fastify/types/instance.js";
-import { randomUUID } from "node:crypto";
 import { InGameModel } from "../models/inGameModel.js";
 import { validateToken } from "../services/auth.js";
-import { nanoid } from "nanoid";
-import {
-  IRequest,
-  RequestParams,
-  RoomData,
-  RoomRequest,
-  RouteInterface,
-} from "./types/routeTypes.js";
+import { RoomData, RoomRequest, RouteInterface } from "./types/routeTypes.js";
 import { FastifyRequest, FastifyReply } from "fastify";
-import { ObjectId } from "mongodb";
 
 const inGameDatabase = new InGameModel();
 
@@ -22,26 +13,38 @@ export const roomRoutes = async (server: FastifyInstance) => {
       preHandler: [validateToken],
     },
     async (request, reply: FastifyReply) => {
-      const body: RoomData = request.body as RoomData;
-      const roomId = randomUUID();
-      const inviteCode = nanoid(4);
-
       try {
-        const createdRoom: Boolean = await inGameDatabase.create({
-          room_id: roomId,
+        const body: RoomData = request.body as RoomData;
+        const currentUserEmail = request.headers["user-email"] as string;
+
+        const roomExists = await inGameDatabase.roomExists(
+          body.room_name,
+          currentUserEmail
+        );
+        if (roomExists !== null) {
+          return reply
+            .status(400)
+            .send({ error: "Cant create rooms with the same name" });
+        }
+
+        const createdRoom: Object | null = await inGameDatabase.createRoom({
           room_name: body.room_name,
-          inviteCode: inviteCode,
-          players: [],
+          owner: currentUserEmail,
         });
 
-        return reply.status(201).send({ created: createdRoom });
+        if (createdRoom) {
+          console.log("Room was successfully created:", createdRoom);
+          return reply.status(201).send({ created: createdRoom });
+        } else {
+          console.log("Room creation failed.");
+          return reply.status(500).send({ error: "Room creation failed" });
+        }
       } catch (error) {
         console.error("Error creating room:", error);
         reply.status(500).send({ error: "Internal server error" });
       }
     }
   );
-
   server.get<RouteInterface>(
     "/rooms/:inviteCode",
     {
@@ -58,7 +61,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
           return;
         }
 
-        return reply.status(200).send({ success: "Room created sucessfully" });
+        return reply.status(200).send({ success: "Room found" });
       } catch (error) {
         console.error("Error getting room:", error);
         reply.status(500).send({ error: "Internal server error" });
@@ -130,8 +133,12 @@ export const roomRoutes = async (server: FastifyInstance) => {
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const { entity_id, room_id, character_id } = request.body as RoomData;
+        const currentUserEmail = request.headers["user-email"] as string;
 
-        const roomExists = await inGameDatabase.roomExists(room_id);
+        const roomExists = await inGameDatabase.roomExists(
+          room_id as string,
+          currentUserEmail
+        );
         if (!roomExists) {
           return reply.status(404).send({ error: "Room not found" });
         }

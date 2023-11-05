@@ -74,29 +74,31 @@ export interface DmData {
 }
 
 export interface RoomData {
-  room_id: string;
+  room_id?: string;
   room_name: string;
-  inviteCode: string;
-  players: [];
+  inviteCode?: string;
+  players?: [];
   character_id?: string;
   entity_id?: string | undefined;
+  owner?: string;
 }
 
 export interface CharacterData {
   id: string;
   name: string;
-  level: number;
-  class: string;
+  level?: number;
+  class?: string;
   attributes: {
-    for: number;
-    dex: number;
-    con: number;
-    int: number;
-    wis: number;
-    car: number;
+    str?: number;
+    dex?: number;
+    con?: number;
+    int?: number;
+    wis?: number;
+    car?: number;
   };
-  hitpoints: number;
-  armor_class: number;
-  initiative: number;
+  hitpoints?: number;
+  armor_class?: number;
+  initiative?: number;
   owner?: string;
+  isDm?: boolean;
 }

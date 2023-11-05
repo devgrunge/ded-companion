@@ -1,14 +1,15 @@
-import { FastifyInstance } from "fastify/types/instance.js";
+import { FastifyInstance } from "fastify/types/instance.ts";
 import { CharacterModel } from "../models/characterModel.ts";
-import { validateToken } from "../services/auth.js";
+import { validateToken } from "../services/auth.ts";
 import { randomUUID } from "node:crypto";
-import { mongoClient } from "../config/db.js";
+import { mongoClient } from "../config/db.ts";
 import {
   CharacterData,
   CharacterParams,
   RouteInterface,
-} from "./types/routeTypes.js";
-import { FastifyReply } from "fastify/types/reply.js";
+} from "./types/routeTypes.ts";
+import { FastifyReply } from "fastify/types/reply.ts";
+import { FastifyRequest } from "fastify";
 
 const database = new CharacterModel();
 
@@ -18,8 +19,8 @@ export const characterRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request, reply: FastifyReply) => {
-      const params = request.params as CharacterParams;
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      // const params = request.params as CharacterParams;
       const body: CharacterData = request.body as CharacterData;
       const dataId = randomUUID();
       try {
@@ -29,7 +30,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
           level: body.level,
           class: body.class,
           attributes: {
-            for: body.attributes.for,
+            str: body.attributes.str,
             dex: body.attributes.dex,
             con: body.attributes.con,
             int: body.attributes.int,
@@ -41,7 +42,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
           initiative: 0,
         };
 
-        const ownerEmail = params.user.email;
+        const ownerEmail = request.headers["user-email"] as string;
 
         const updatedPlayer = await database.create(ownerEmail, characterData);
 
@@ -59,8 +60,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
       preHandler: [validateToken],
     },
     async (request, reply) => {
-      const params = request.params as CharacterParams;
-      const currentUserEmail = params.user?.email;
+      const currentUserEmail = request.headers["user-email"] as string;
 
       if (currentUserEmail) {
         try {
@@ -82,13 +82,11 @@ export const characterRoutes = async (server: FastifyInstance) => {
       preHandler: [validateToken],
     },
     async (request, reply) => {
-      const params = request.params as CharacterParams;
-      const characterId = params.id;
-      const body = request.body as CharacterData;
-
-      const currentUserEmail = params.user.email;
-
       try {
+        const params = request.params as CharacterParams;
+        const characterId = params.id;
+        const body = request.body as CharacterData;
+        const currentUserEmail = request.headers["user-email"] as string;
         const db = mongoClient.db("dndcompanion");
         const collection = db.collection("Players");
 
@@ -104,7 +102,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
                   level: body.level,
                   class: body.class,
                   attributes: {
-                    for: body.attributes.for,
+                    str: body.attributes.str,
                     dex: body.attributes.dex,
                     con: body.attributes.con,
                     int: body.attributes.int,
@@ -146,7 +144,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
     async (request, reply) => {
       const params = request.params as CharacterParams;
       const characterId = params.id;
-      const ownerEmail = params.user.email;
+      const ownerEmail = request.headers["user-email"] as string;
 
       try {
         const success = await database.delete(characterId, ownerEmail);

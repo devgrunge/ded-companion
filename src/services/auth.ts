@@ -1,25 +1,18 @@
-import Jwt from "jsonwebtoken";
+import Jwt, { JwtHeader } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { User } from "./authTypes.ts";
+import { User, VerifiedUser } from "./authTypes.ts";
 import { LoginModel } from "../models/loginModel.ts";
 import "dotenv/config";
 
-declare module "fastify" {
-  interface FastifyRequest {
-    user: User;
-  }
-}
-
 const database = new LoginModel();
-const appSecret = process.env.PRIVATE_KEY as any;
+const appSecret = process.env.PRIVATE_KEY as string;
 
 export const jwtAuth = async (
   email: string,
   password: string
 ): Promise<string> => {
   try {
-    console.log(email, password);
     const userExists = await database.getUserInfo(email);
 
     if (userExists?.length === 0) {
@@ -54,10 +47,10 @@ export const validateToken = async (
     const token = request.headers.authorization
       ?.replace(/^Bearer/, "")
       .trim() as any;
-    const verifiedUser: User | unknown = Jwt.verify(
+    const verifiedUser: VerifiedUser | unknown = Jwt.verify(
       token,
       appSecret
-    ) as unknown;
+    ) as JwtHeader;
 
     if (!token) {
       reply.status(401).send("Unauthorized: missing token");
@@ -66,7 +59,8 @@ export const validateToken = async (
       throw "User not found";
     }
     if (verifiedUser && typeof verifiedUser === "object") {
-      request.user = verifiedUser as User;
+      request.headers["user-id"] = (verifiedUser as VerifiedUser).id;
+      request.headers["user-email"] = (verifiedUser as VerifiedUser).email;
       done();
     }
   } catch (error) {

@@ -16,6 +16,8 @@
       "DOM",
       "ES2015"
     ],
-    "target": "ES2015"
+    "target": "ES2015",
+    "noEmit" : true,
+    "allowImportingTsExtensions": true,
   }
 }

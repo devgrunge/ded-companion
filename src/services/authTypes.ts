@@ -8,3 +8,16 @@ export type UserData = {
   email: string;
   password: string;
 };
+
+export interface VerifiedUser {
+  id: string;
+  email: string;
+  iat: number;
+  exp: number;
+}
+
+declare module "fastify" {
+  interface FastifyRequest {
+    user: User;
+  }
+}
