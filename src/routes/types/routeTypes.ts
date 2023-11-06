@@ -68,9 +68,12 @@ export interface IReply {
   500: { error: string };
 }
 
-export interface DmData {
+export interface DmParams {
+  room_id?: string | undefined;
   id?: string;
-  dm_name?: string | undefined;
+  name?: string | undefined;
+  email?: string | undefined;
+  isDm?: boolean | undefined;
 }
 
 export interface RoomData {

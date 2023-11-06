@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { mongoClient } from "../config/db.js";
+import { mongoClient } from "../config/db.ts";
 import { RoomData } from "../routes/types/routeTypes.js";
 import { CharacterModel } from "./characterModel.js";
 import { nanoid } from "nanoid";
@@ -23,7 +23,6 @@ export class InGameModel {
       };
 
       const result = await roomsCollection.insertOne(room);
-      console.log("result ====>", result);
 
       if (result.acknowledged && result.insertedId) {
         console.log("Room was successfully created:", result.insertedId);
@@ -32,20 +31,6 @@ export class InGameModel {
         console.log("Room creation failed.");
         return null;
       }
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async setDungeonMaster(playerId: string) {
-    const db = mongoClient.db("dndcompanion");
-    const playersCollection = db.collection("Players");
-
-    try {
-      await playersCollection.updateOne(
-        { id: playerId },
-        { $set: { isDm: true } }
-      );
     } catch (error) {
       throw error;
     }
@@ -95,13 +80,12 @@ export class InGameModel {
   }
   async roomExists(roomId: string, currentUserEmail: string) {
     try {
-      console.log("email", currentUserEmail);
       const db = mongoClient.db("dndcompanion");
       const roomsCollection = db.collection("Rooms");
       const room = await roomsCollection.findOne({
         room_id: roomId,
-        owner: currentUserEmail,
       });
+      console.log("room search result ===> ", room);
 
       return room;
     } catch (error) {
@@ -218,5 +202,15 @@ export class InGameModel {
 
   async getPlayersInRoom(roomId: string) {}
 
-  async getDungeonMastersInRoom(roomId: string) {}
+  async getDungeonMasterInRoom( dataRequest : RoomData) {
+    try {
+      console.log(" params ===>  ", dataRequest);
+
+
+
+    } catch (error) {
+      console.error("Internal server error: ", error);
+      throw new Error("Internal server error: ");
+    }
+  }
 }
