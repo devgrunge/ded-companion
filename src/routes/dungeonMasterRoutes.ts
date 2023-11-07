@@ -1,6 +1,11 @@
 import { FastifyInstance } from "fastify/types/instance.ts";
 import { validateToken } from "../services/auth.ts";
-import { DmParams, RoomData, RouteInterface } from "./types/routeTypes.ts";
+import {
+  DmParams,
+  DungeonMasterRequest,
+  RoomData,
+  RouteInterface,
+} from "./types/routeTypes.ts";
 import { DmModel } from "../models/dmModel.ts";
 import { InGameModel } from "../models/inGameModel.ts";
 
@@ -46,22 +51,23 @@ export const dungeonMasterRoutes = async (server: FastifyInstance) => {
     }
   );
   server.get<RouteInterface>(
-    "/dm",
+    "/dm/:roomId",
     {
       preHandler: [validateToken],
     },
     async (request, reply) => {
       try {
-        const RoomData = request.body as RoomData;
-        console.log("My room data: ",RoomData)
+        const room_id = (request as unknown as DungeonMasterRequest).params
+          ?.roomId;
         const dungeonMaster = await inGameDatabase.getDungeonMasterInRoom(
-          RoomData
+          room_id
         );
-        if (!RoomData) {
+        if (!room_id) {
           throw new Error("Property is required");
         }
 
-        return reply.status(204).send({ updated: `Dm is:  ${dungeonMaster}` });
+        console.log("dm object ==>", dungeonMaster);
+        return reply.status(200).send({ success: `Dm is:  ${dungeonMaster.name}` });
       } catch (error) {
         console.error("internal server error");
         return reply.status(500).send({ error: "Internal server error" });

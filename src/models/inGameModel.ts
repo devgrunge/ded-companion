@@ -3,6 +3,7 @@ import { mongoClient } from "../config/db.ts";
 import { RoomData } from "../routes/types/routeTypes.js";
 import { CharacterModel } from "./characterModel.js";
 import { nanoid } from "nanoid";
+import { Player } from "./types/modelTypes.ts";
 
 const characterDatabase = new CharacterModel();
 
@@ -202,12 +203,27 @@ export class InGameModel {
 
   async getPlayersInRoom(roomId: string) {}
 
-  async getDungeonMasterInRoom( dataRequest : RoomData) {
+  async getDungeonMasterInRoom(roomId: string | unknown) {
     try {
-      console.log(" params ===>  ", dataRequest);
+      const db = mongoClient.db("dndcompanion");
+      const roomsCollection = db.collection("Rooms");
 
+      const roomData = await roomsCollection.findOne({ room_id: roomId });
+      console.log("room data ===>", roomData);
 
+      if (!roomData) {
+        throw new Error("Room not found");
+      }
 
+      const dungeonMaster = roomData.players.find(
+        (player: Player) => player.isDm === true
+      );
+
+      if (!dungeonMaster) {
+        throw new Error("Dungeon master not found");
+      }
+
+      return dungeonMaster;
     } catch (error) {
       console.error("Internal server error: ", error);
       throw new Error("Internal server error: ");

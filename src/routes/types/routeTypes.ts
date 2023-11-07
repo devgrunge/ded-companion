@@ -36,6 +36,9 @@ export interface DungeonMasterRequest extends RouteInterface {
   Params: {
     id?: string | unknown;
   };
+  params?: {
+    roomId: string | unknown;
+  }
 }
 
 export interface RequestParams extends RouteInterface {
