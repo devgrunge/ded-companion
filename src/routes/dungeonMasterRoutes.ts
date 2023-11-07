@@ -8,6 +8,7 @@ import {
 } from "./types/routeTypes.ts";
 import { DmModel } from "../models/dmModel.ts";
 import { InGameModel } from "../models/inGameModel.ts";
+import { Player } from "../models/types/modelTypes.ts";
 
 const database = new DmModel();
 const inGameDatabase = new InGameModel();
@@ -59,17 +60,48 @@ export const dungeonMasterRoutes = async (server: FastifyInstance) => {
       try {
         const room_id = (request as unknown as DungeonMasterRequest).params
           ?.roomId;
+
+        if (!room_id) {
+          return reply.status(400).send({ error: "Dm not found" });
+        }
+
         const dungeonMaster = await inGameDatabase.getDungeonMasterInRoom(
           room_id
         );
-        if (!room_id) {
-          throw new Error("Property is required");
-        }
 
-        console.log("dm object ==>", dungeonMaster);
-        return reply.status(200).send({ success: `Dm is:  ${dungeonMaster.name}` });
+        return reply
+          .status(200)
+          .send({ success: `Dm is:  ${dungeonMaster.name}` });
       } catch (error) {
         console.error("internal server error");
+        return reply.status(500).send({ error: "Internal server error" });
+      }
+    }
+  );
+  server.get<RouteInterface>(
+    "/players/:roomId",
+    {
+      preHandler: [validateToken],
+    },
+    async (request, reply) => {
+      try {
+        const room_id = (request as unknown as DungeonMasterRequest).params
+          ?.roomId;
+
+        const getPlayers = await inGameDatabase.getPlayersInRoom(room_id);
+
+        if (!getPlayers) {
+          return reply.status(400).send({ error: "Players not found" });
+        }
+        const allPlayers = await getPlayers?.map(
+          (item: Player) => item.character?.name
+        );
+
+        return reply
+          .status(200)
+          .send({ success: `Players in room ${allPlayers}` });
+      } catch (error) {
+        console.error("Internal server error", error);
         return reply.status(500).send({ error: "Internal server error" });
       }
     }

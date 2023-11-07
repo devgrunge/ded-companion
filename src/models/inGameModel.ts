@@ -201,7 +201,31 @@ export class InGameModel {
     }
   }
 
-  async getPlayersInRoom(roomId: string) {}
+  async getPlayersInRoom(roomId: string | unknown) {
+    try {
+      const db = mongoClient.db("dndcompanion");
+      const roomsCollection = db.collection("Rooms");
+
+      const roomData = await roomsCollection.findOne({ room_id: roomId });
+
+      if (!roomData) {
+        throw new Error("Room not found");
+      }
+
+      const players = roomData.players.filter(
+        (player: Player) => player.character?.level
+      );
+
+      if (!players) {
+        throw new Error("Players not found");
+      }
+
+      return players;
+    } catch (error) {
+      console.error("Internal server error: ", error);
+      throw new Error("Internal server error: ");
+    }
+  }
 
   async getDungeonMasterInRoom(roomId: string | unknown) {
     try {
@@ -209,7 +233,6 @@ export class InGameModel {
       const roomsCollection = db.collection("Rooms");
 
       const roomData = await roomsCollection.findOne({ room_id: roomId });
-      console.log("room data ===>", roomData);
 
       if (!roomData) {
         throw new Error("Room not found");

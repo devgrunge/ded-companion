@@ -213,24 +213,4 @@ export const roomRoutes = async (server: FastifyInstance) => {
       }
     }
   );
-
-  server.get<RouteInterface>(
-    "/rooms/dungeon_masters/:room_id",
-    {
-      preHandler: [validateToken],
-    },
-    async (request, reply) => {
-      try {
-        const roomId = (request as RoomRequest).params.room_id;
-
-        const dungeonMastersInRoom =
-          await inGameDatabase.getDungeonMastersInRoom(roomId);
-
-        return reply.status(200).send({ success: dungeonMastersInRoom });
-      } catch (error) {
-        console.error("Error fetching dungeon masters in room: ", error);
-        return reply.status(500).send({ error: "Internal Server Error" });
-      }
-    }
-  );
 };
