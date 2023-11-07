@@ -5,6 +5,7 @@ import {
   DungeonMasterRequest,
   RoomData,
   RouteInterface,
+  UpdatePlayersRequestBody,
 } from "./types/routeTypes.ts";
 import { DmModel } from "../models/dmModel.ts";
 import { InGameModel } from "../models/inGameModel.ts";
@@ -99,7 +100,35 @@ export const dungeonMasterRoutes = async (server: FastifyInstance) => {
 
         return reply
           .status(200)
-          .send({ success: `Players in room ${allPlayers}` });
+          .send({ success: `Players in room ${allPlayers.join(", ")}` });
+      } catch (error) {
+        console.error("Internal server error", error);
+        return reply.status(500).send({ error: "Internal server error" });
+      }
+    }
+  );
+  server.post<RouteInterface>(
+    "/update-players/:roomId",
+    {
+      preHandler: [validateToken],
+    },
+    async (request, reply) => {
+      try {
+        const body = request.body as UpdatePlayersRequestBody;
+        const roomId = (request as unknown as DungeonMasterRequest).params
+          ?.roomId;
+
+        const { playerIds, updatedData } = body;
+
+        const result = await inGameDatabase.updatePlayersData(
+          roomId,
+          playerIds,
+          updatedData
+        );
+
+        return reply
+          .status(200)
+          .send({ success: `Updated ${result.modifiedCount} players` });
       } catch (error) {
         console.error("Internal server error", error);
         return reply.status(500).send({ error: "Internal server error" });

@@ -252,4 +252,40 @@ export class InGameModel {
       throw new Error("Internal server error: ");
     }
   }
+  async updatePlayersData(
+    roomId: string | unknown,
+    playerIds: string[] | unknown,
+    updatedData: Partial<Player> | unknown
+  ) {
+    try {
+      const db = mongoClient.db("dndcompanion");
+      const roomsCollection = db.collection("Rooms");
+
+      const filter = {
+        room_id: roomId,
+        "players.id": { $in: playerIds },
+      };
+
+      const update = {
+        $set: {
+          "players.$[player].character": updatedData,
+        },
+      };
+
+      const options = {
+        arrayFilters: [{ "player.id": { $in: playerIds } }],
+      };
+
+      const result = await roomsCollection.updateOne(filter, update, options);
+
+      if (result.modifiedCount === 0) {
+        throw new Error("No players were updated");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Internal server error", error);
+      throw new Error("Internal server error");
+    }
+  }
 }

@@ -7,7 +7,6 @@ export class DmModel {
       const db = mongoClient.db("dndcompanion");
       const roomsCollection = db.collection("Rooms");
 
-      console.log("my request params ===>", dataRequest);
       const room = await roomsCollection.findOne({
         room_id: dataRequest.room_id,
       });
