@@ -60,16 +60,20 @@ export class LoginModel {
     }
   }
 
-  async updateUser(email: string, password: string, name: string) {
+  async updateUser(
+    email: string,
+    password: string,
+    name: string,
+    isDm: boolean | undefined
+  ) {
     const db = mongoClient.db("dndcompanion");
     const collection = db.collection("Players");
 
     try {
       const filter = { email };
-      const hashedPassword = await bcrypt.hash(password, 10); // Hash the new password
-
+      const hashedPassword = await bcrypt.hash(password, 10);
       const updateData = {
-        $set: { password: hashedPassword, name },
+        $set: { password: hashedPassword, name, isDm },
       };
 
       const result = await collection.updateOne(filter, updateData);

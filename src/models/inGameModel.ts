@@ -1,8 +1,9 @@
 import { randomUUID } from "crypto";
-import { mongoClient } from "../config/db.js";
+import { mongoClient } from "../config/db.ts";
 import { RoomData } from "../routes/types/routeTypes.js";
 import { CharacterModel } from "./characterModel.js";
 import { nanoid } from "nanoid";
+import { Player } from "./types/modelTypes.ts";
 
 const characterDatabase = new CharacterModel();
 
@@ -23,7 +24,6 @@ export class InGameModel {
       };
 
       const result = await roomsCollection.insertOne(room);
-      console.log("result ====>", result);
 
       if (result.acknowledged && result.insertedId) {
         console.log("Room was successfully created:", result.insertedId);
@@ -32,20 +32,6 @@ export class InGameModel {
         console.log("Room creation failed.");
         return null;
       }
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  async setDungeonMaster(playerId: string) {
-    const db = mongoClient.db("dndcompanion");
-    const playersCollection = db.collection("Players");
-
-    try {
-      await playersCollection.updateOne(
-        { id: playerId },
-        { $set: { isDm: true } }
-      );
     } catch (error) {
       throw error;
     }
@@ -95,13 +81,12 @@ export class InGameModel {
   }
   async roomExists(roomId: string, currentUserEmail: string) {
     try {
-      console.log("email", currentUserEmail);
       const db = mongoClient.db("dndcompanion");
       const roomsCollection = db.collection("Rooms");
       const room = await roomsCollection.findOne({
         room_id: roomId,
-        owner: currentUserEmail,
       });
+      console.log("room search result ===> ", room);
 
       return room;
     } catch (error) {
@@ -216,7 +201,91 @@ export class InGameModel {
     }
   }
 
-  async getPlayersInRoom(roomId: string) {}
+  async getPlayersInRoom(roomId: string | unknown) {
+    try {
+      const db = mongoClient.db("dndcompanion");
+      const roomsCollection = db.collection("Rooms");
 
-  async getDungeonMastersInRoom(roomId: string) {}
+      const roomData = await roomsCollection.findOne({ room_id: roomId });
+
+      if (!roomData) {
+        throw new Error("Room not found");
+      }
+
+      const players = roomData.players.filter(
+        (player: Player) => player.character?.level
+      );
+
+      if (!players) {
+        throw new Error("Players not found");
+      }
+
+      return players;
+    } catch (error) {
+      console.error("Internal server error: ", error);
+      throw new Error("Internal server error: ");
+    }
+  }
+
+  async getDungeonMasterInRoom(roomId: string | unknown) {
+    try {
+      const db = mongoClient.db("dndcompanion");
+      const roomsCollection = db.collection("Rooms");
+
+      const roomData = await roomsCollection.findOne({ room_id: roomId });
+
+      if (!roomData) {
+        throw new Error("Room not found");
+      }
+
+      const dungeonMaster = roomData.players.find(
+        (player: Player) => player.isDm === true
+      );
+
+      if (!dungeonMaster) {
+        throw new Error("Dungeon master not found");
+      }
+
+      return dungeonMaster;
+    } catch (error) {
+      console.error("Internal server error: ", error);
+      throw new Error("Internal server error: ");
+    }
+  }
+  async updatePlayersData(
+    roomId: string | unknown,
+    playerIds: string[] | unknown,
+    updatedData: Partial<Player> | unknown
+  ) {
+    try {
+      const db = mongoClient.db("dndcompanion");
+      const roomsCollection = db.collection("Rooms");
+
+      const filter = {
+        room_id: roomId,
+        "players.id": { $in: playerIds },
+      };
+
+      const update = {
+        $set: {
+          "players.$[player].character": updatedData,
+        },
+      };
+
+      const options = {
+        arrayFilters: [{ "player.id": { $in: playerIds } }],
+      };
+
+      const result = await roomsCollection.updateOne(filter, update, options);
+
+      if (result.modifiedCount === 0) {
+        throw new Error("No players were updated");
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Internal server error", error);
+      throw new Error("Internal server error");
+    }
+  }
 }

@@ -1,89 +1,137 @@
 import { FastifyInstance } from "fastify/types/instance.ts";
 import { validateToken } from "../services/auth.ts";
 import {
-  DmData,
+  DmParams,
   DungeonMasterRequest,
+  RoomData,
   RouteInterface,
+  UpdatePlayersRequestBody,
 } from "./types/routeTypes.ts";
-import { FastifyReply } from "fastify/types/reply.ts";
 import { DmModel } from "../models/dmModel.ts";
+import { InGameModel } from "../models/inGameModel.ts";
+import { Player } from "../models/types/modelTypes.ts";
 
 const database = new DmModel();
+const inGameDatabase = new InGameModel();
 
 export const dungeonMasterRoutes = async (server: FastifyInstance) => {
   server.post<RouteInterface>(
-    "/dungeon-master",
-    {
-      preHandler: [validateToken],
-    },
-    async (request, reply: FastifyReply) => {
-      const body = request.body as DmData;
-
-      try {
-        await database.create({
-          dm_name: body.dm_name,
-        });
-        return reply.status(204).send({ success: "Dm created sucessfully" });
-      } catch (error) {
-        console.error("Error creating Dungeon master:", error);
-        reply.status(500).send({ error: "Internal server error" });
-      }
-    }
-  );
-
-  server.get<DungeonMasterRequest>(
-    "/dungeon-master",
-    {
-      preHandler: [validateToken],
-    },
-    async (request, reply: FastifyReply) => {
-      const search = request.query.search;
-      try {
-        const data = await database.list(search);
-        return data;
-      } catch (error) {
-        console.error(error);
-        return reply.status(500).send({ error: "Internal Server Error" });
-      }
-    }
-  );
-
-  server.put<DungeonMasterRequest>(
-    "/dungeon-master/:id",
-    {
-      preHandler: [validateToken],
-    },
-    async (request, reply: FastifyReply) => {
-      const dmId = request.params.id;
-      const body = request.body as DmData;
-
-      try {
-        await database.update(dmId, {
-          dm_name: body.dm_name,
-        });
-        return reply.status(204).send({ success: "Dm updated sucessfully" });
-      } catch (error) {
-        console.error("Error updating Dungeon master:", error);
-        reply.status(400).send({ error: "Id does not exist" });
-      }
-    }
-  );
-
-  server.delete<DungeonMasterRequest>(
-    "/dungeon-master/:id",
+    "/dm/enter",
     {
       preHandler: [validateToken],
     },
     async (request, reply) => {
-      const dmId = request.params.id;
-
       try {
-        await database.delete(dmId);
+        const body = request.body as DmParams;
+        const currentUserEmail = request.headers["user-email"] as string;
 
-        return reply.status(204).send();
+        if (!body.isDm) {
+          reply.status(400).send({ error: "This user is not a Dm" });
+        }
+
+        const roomExists = await inGameDatabase.roomExists(
+          body.room_id as string,
+          currentUserEmail
+        );
+
+        console.log("room exists ===>", roomExists);
+
+        if (!roomExists) {
+          return reply.status(404).send({ error: "Room not found" });
+        }
+
+        const enterRoom = database.enterRoom(body);
+        if (!enterRoom) {
+          reply.status(400).send({ error: "Internal server error" });
+        }
+
+        return reply.status(204).send({ updated: "Dm entered in the room" });
       } catch (error) {
-        console.error("Error deleting Dungeon master:", error);
-        return reply.status(500).send({ error: "Internal Server Error" });
+        console.error("Internal server error: ", error);
+        reply.status(500).send({ error: "Internal server error" });
+      }
+    }
+  );
+  server.get<RouteInterface>(
+    "/dm/:roomId",
+    {
+      preHandler: [validateToken],
+    },
+    async (request, reply) => {
+      try {
+        const room_id = (request as unknown as DungeonMasterRequest).params
+          ?.roomId;
+
+        if (!room_id) {
+          return reply.status(400).send({ error: "Dm not found" });
+        }
+
+        const dungeonMaster = await inGameDatabase.getDungeonMasterInRoom(
+          room_id
+        );
+
+        return reply
+          .status(200)
+          .send({ success: `Dm is:  ${dungeonMaster.name}` });
+      } catch (error) {
+        console.error("internal server error");
+        return reply.status(500).send({ error: "Internal server error" });
+      }
+    }
+  );
+  server.get<RouteInterface>(
+    "/players/:roomId",
+    {
+      preHandler: [validateToken],
+    },
+    async (request, reply) => {
+      try {
+        const room_id = (request as unknown as DungeonMasterRequest).params
+          ?.roomId;
+
+        const getPlayers = await inGameDatabase.getPlayersInRoom(room_id);
+
+        if (!getPlayers) {
+          return reply.status(400).send({ error: "Players not found" });
+        }
+        const allPlayers = await getPlayers?.map(
+          (item: Player) => item.character?.name
+        );
+
+        return reply
+          .status(200)
+          .send({ success: `Players in room ${allPlayers.join(", ")}` });
+      } catch (error) {
+        console.error("Internal server error", error);
+        return reply.status(500).send({ error: "Internal server error" });
+      }
+    }
+  );
+  server.post<RouteInterface>(
+    "/update-players/:roomId",
+    {
+      preHandler: [validateToken],
+    },
+    async (request, reply) => {
+      try {
+        const body = request.body as UpdatePlayersRequestBody;
+        const roomId = (request as unknown as DungeonMasterRequest).params
+          ?.roomId;
+
+        const { playerIds, updatedData } = body;
+
+        const result = await inGameDatabase.updatePlayersData(
+          roomId,
+          playerIds,
+          updatedData
+        );
+
+        return reply
+          .status(200)
+          .send({ success: `Updated ${result.modifiedCount} players` });
+      } catch (error) {
+        console.error("Internal server error", error);
+        return reply.status(500).send({ error: "Internal server error" });
       }
     }
   );

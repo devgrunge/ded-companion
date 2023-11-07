@@ -83,7 +83,7 @@ export const authRoutes = async (server: FastifyInstance) => {
     },
     async (request, reply: FastifyReply) => {
       try {
-        const { email, password, name } = request.body as PlayerParams;
+        const { email, password, name, isDm } = request.body as PlayerParams;
 
         if (!email || !password || !name) {
           return reply
@@ -97,7 +97,7 @@ export const authRoutes = async (server: FastifyInstance) => {
           return reply.status(400).send({ errror: "User do not exists" });
         }
 
-        const updatedUser = await database.updateUser(email, password, name);
+        const updatedUser = await database.updateUser(email, password, name, isDm);
 
         return reply.status(204).send({ updated: updatedUser });
       } catch (error) {

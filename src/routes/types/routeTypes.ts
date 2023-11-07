@@ -1,6 +1,7 @@
 import { FastifyReply } from "fastify/types/reply";
 import { FastifyRequest } from "fastify/types/request";
 import { WithId } from "mongodb";
+import { Player } from "../../models/types/modelTypes";
 
 export interface IQuerystring {
   username: string;
@@ -36,6 +37,9 @@ export interface DungeonMasterRequest extends RouteInterface {
   Params: {
     id?: string | unknown;
   };
+  params?: {
+    roomId: string | unknown;
+  };
 }
 
 export interface RequestParams extends RouteInterface {
@@ -68,9 +72,12 @@ export interface IReply {
   500: { error: string };
 }
 
-export interface DmData {
+export interface DmParams {
+  room_id?: string | undefined;
   id?: string;
-  dm_name?: string | undefined;
+  name?: string | undefined;
+  email?: string | undefined;
+  isDm?: boolean | undefined;
 }
 
 export interface RoomData {
@@ -81,6 +88,7 @@ export interface RoomData {
   character_id?: string;
   entity_id?: string | undefined;
   owner?: string;
+  params?: string;
 }
 
 export interface CharacterData {
@@ -101,4 +109,11 @@ export interface CharacterData {
   initiative?: number;
   owner?: string;
   isDm?: boolean;
+}
+
+
+export interface UpdatePlayersRequestBody {
+  playerIds: string[];
+  updatedData: Partial<Player>;
+  roomId: string | unknown;
 }
