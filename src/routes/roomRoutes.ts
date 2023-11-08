@@ -3,7 +3,9 @@ import { InGameModel } from "../models/inGameModel.js";
 import { validateToken } from "../services/auth.js";
 import { RoomData, RoomRequest, RouteInterface } from "./types/routeTypes.js";
 import { FastifyRequest, FastifyReply } from "fastify";
+import { Utils } from "../utils/index.ts";
 
+const validation = new Utils();
 const inGameDatabase = new InGameModel();
 
 export const roomRoutes = async (server: FastifyInstance) => {
@@ -149,10 +151,21 @@ export const roomRoutes = async (server: FastifyInstance) => {
             character_id
           );
 
-        if (!characterBelongsToPlayer) {
+        const playerNames = await validation.getUserNames(room_id);
+
+        const isNameUnique = await validation.validatePlayerNamesInRoom(
+          room_id,
+          playerNames
+        );
+
+        if (!characterBelongsToPlayer || isNameUnique) {
           return reply
             .status(403)
-            .send({ error: "Character doesn't belong to the player" });
+            .send({
+              error: `Character can't enter, server returned ${
+                characterBelongsToPlayer && "Character don't belongs to player" || isNameUnique && "Player with the same name in room"
+              }`,
+            });
         }
 
         await inGameDatabase.enterRoom(entity_id, room_id, character_id);

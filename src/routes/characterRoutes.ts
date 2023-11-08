@@ -4,12 +4,12 @@ import { validateToken } from "../services/auth.ts";
 import { randomUUID } from "node:crypto";
 import { mongoClient } from "../config/db.ts";
 import {
-  CharacterData,
   CharacterParams,
   RouteInterface,
 } from "./types/routeTypes.ts";
 import { FastifyReply } from "fastify/types/reply.ts";
 import { FastifyRequest } from "fastify";
+import { CharacterData } from "../models/types/modelTypes.ts";
 
 const database = new CharacterModel();
 
