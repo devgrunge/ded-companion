@@ -90,30 +90,3 @@ export interface RoomData {
   owner?: string;
   params?: string;
 }
-
-export interface CharacterData {
-  id: string;
-  name: string;
-  level?: number;
-  class?: string;
-  attributes: {
-    str?: number;
-    dex?: number;
-    con?: number;
-    int?: number;
-    wis?: number;
-    car?: number;
-  };
-  hitpoints?: number;
-  armor_class?: number;
-  initiative?: number;
-  owner?: string;
-  isDm?: boolean;
-}
-
-
-export interface UpdatePlayersRequestBody {
-  playerIds: string[];
-  updatedData: Partial<Player>;
-  roomId: string | unknown;
-}

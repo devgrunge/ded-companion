@@ -3,7 +3,8 @@ import { mongoClient } from "../config/db.ts";
 import { RoomData } from "../routes/types/routeTypes.js";
 import { CharacterModel } from "./characterModel.js";
 import { nanoid } from "nanoid";
-import { Player } from "./types/modelTypes.ts";
+import { Character, Player, RoomsModel } from "./types/modelTypes.ts";
+import { Collection, Filter, WithId } from "mongodb";
 
 const characterDatabase = new CharacterModel();
 
@@ -12,7 +13,7 @@ export class InGameModel {
     try {
       const db = mongoClient.db("dndcompanion");
       const roomsCollection = db.collection("Rooms");
-      console.log("rendered");
+
       const randomId = randomUUID();
       const inviteCode = nanoid(4);
       const room: RoomData = {
@@ -252,40 +253,49 @@ export class InGameModel {
       throw new Error("Internal server error: ");
     }
   }
-  async updatePlayersData(
-    roomId: string | unknown,
-    playerIds: string[] | unknown,
-    updatedData: Partial<Player> | unknown
+  async updateCharacterData(
+    roomId: string,
+    characterName: string,
+    updatedCharacterData: Partial<Character>
   ) {
-    try {
-      const db = mongoClient.db("dndcompanion");
-      const roomsCollection = db.collection("Rooms");
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
 
-      const filter = {
-        room_id: roomId,
-        "players.id": { $in: playerIds },
+    const room = (await roomsCollection.findOne({
+      room_id: roomId,
+    })) as RoomsModel;
+
+    if (!room) {
+      throw new Error("Room not found");
+    }
+
+    const playerToUpdate = room.players.find((player) => {
+      return player.character?.name === characterName;
+    });
+
+    if (!playerToUpdate) {
+      throw new Error("Player not found");
+    }
+
+    if (playerToUpdate.character) {
+      playerToUpdate.character = {
+        ...playerToUpdate.character,
+        ...updatedCharacterData,
       };
 
-      const update = {
-        $set: {
-          "players.$[player].character": updatedData,
-        },
-      };
+      // Update the room in the database
+      const result = await roomsCollection.updateOne(
+        { room_id: roomId },
+        { $set: { players: room.players } }
+      );
 
-      const options = {
-        arrayFilters: [{ "player.id": { $in: playerIds } }],
-      };
-
-      const result = await roomsCollection.updateOne(filter, update, options);
-
-      if (result.modifiedCount === 0) {
-        throw new Error("No players were updated");
+      if (!result) {
+        throw new Error("No character was updated");
       }
 
-      return result;
-    } catch (error) {
-      console.error("Internal server error", error);
-      throw new Error("Internal server error");
+      return playerToUpdate.character;
+    } else {
+      throw new Error("Character not found for the player");
     }
   }
 }
