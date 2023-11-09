@@ -1,10 +1,8 @@
-import { mongoClient } from "../config/db";
-import { RoomsModel } from "../models/types/modelTypes";
-import { PlayerParams } from "../routes/types/routeTypes";
-
+import { mongoClient } from "../config/db.ts";
+import { RoomsModel } from "../models/types/modelTypes.ts";
+import { PlayerParams } from "../routes/types/routeTypes.ts";
 
 export class Utils {
-  
   async getUserNames(roomId: string | undefined) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
@@ -14,9 +12,8 @@ export class Utils {
     if (!room) {
       throw new Error("Room not found");
     }
-  
-    // Extract player names from the players array
-    const playerNames = room.players.map((player : PlayerParams) => player.name);
+
+    const playerNames = room.players.map((player: PlayerParams) => player.name);
     return playerNames;
   }
   async validatePlayerNamesInRoom(

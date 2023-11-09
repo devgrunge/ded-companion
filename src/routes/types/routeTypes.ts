@@ -81,12 +81,12 @@ export interface DmParams {
 }
 
 export interface RoomData {
+  params?: string;
+  player_id?: string | undefined;
   room_id?: string;
   room_name: string;
   inviteCode?: string;
   players?: [];
   character_id?: string;
-  entity_id?: string | undefined;
   owner?: string;
-  params?: string;
 }
