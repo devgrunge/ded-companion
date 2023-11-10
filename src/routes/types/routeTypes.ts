@@ -17,7 +17,7 @@ export interface PlayerParams {
   name?: string;
   email?: string;
   password?: string;
-  characters?: [];
+  characters?: CharacterData[];
   isDm?: boolean;
 }
 

@@ -1,4 +1,4 @@
-import { ObjectId } from "mongodb";
+import { ObjectId, WithId } from "mongodb";
 
 export interface Character {
   id: string;
@@ -30,12 +30,12 @@ export interface CharacterData {
   level?: number;
   class?: string;
   attributes: {
-    str?: number;
-    dex?: number;
-    con?: number;
-    int?: number;
-    wis?: number;
-    car?: number;
+    str?: number | unknown;
+    dex?: number | unknown;
+    con?: number | unknown;
+    int?: number | unknown;
+    wis?: number | unknown;
+    car?: number | unknown;
   };
   hitpoints?: number;
   armor_class?: number;

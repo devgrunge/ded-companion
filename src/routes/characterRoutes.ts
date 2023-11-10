@@ -20,10 +20,10 @@ export const characterRoutes = async (server: FastifyInstance) => {
       preHandler: [validateToken],
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
-      // const params = request.params as CharacterParams;
-      const body: CharacterData = request.body as CharacterData;
-      const dataId = randomUUID();
       try {
+        const body: CharacterData = request.body as CharacterData;
+        console.log("body ==>",body)
+        const dataId = randomUUID();
         const characterData: CharacterData = {
           id: dataId,
           name: body.name,
@@ -41,7 +41,8 @@ export const characterRoutes = async (server: FastifyInstance) => {
           armor_class: body.armor_class,
           initiative: 0,
         };
-
+        console.log("character data ==>",characterData)
+        
         const ownerEmail = request.headers["user-email"] as string;
 
         const updatedPlayer = await database.create(ownerEmail, characterData);
