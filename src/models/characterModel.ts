@@ -20,8 +20,6 @@ export class CharacterModel {
       }
     } catch (error) {
       throw error;
-    } finally {
-      mongoClient.close();
     }
   }
 
@@ -56,8 +54,6 @@ export class CharacterModel {
     } catch (error) {
       console.error("Error creating character:", error);
       throw error;
-    } finally {
-      mongoClient.close();
     }
   }
 
@@ -107,8 +103,6 @@ export class CharacterModel {
       }
     } catch (error) {
       throw error;
-    } finally {
-      mongoClient.close();
     }
   }
 
@@ -136,8 +130,6 @@ export class CharacterModel {
       }
     } catch (error) {
       throw error;
-    } finally {
-      mongoClient.close();
     }
   }
 
@@ -179,8 +171,6 @@ export class CharacterModel {
       return character;
     } catch (error) {
       throw error;
-    } finally {
-      mongoClient.close();
     }
   }
 }

@@ -35,8 +35,6 @@ export class Utils {
       throw new Error("Room not found");
     }
 
-    const arr = playerNames;
-    console.log("names array ==>", arr);
     const playerWithSameName = room.players.find(
       (player: PlayerParams) => player.name === playerNames
     );

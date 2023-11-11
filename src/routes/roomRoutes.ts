@@ -89,8 +89,6 @@ export const roomRoutes = async (server: FastifyInstance) => {
           room_name: body.room_name,
         });
 
-        console.log("updated room", updatedRoom);
-
         if (!updatedRoom) {
           reply.status(404).send({ error: "Room not found" });
           return;
@@ -162,7 +160,6 @@ export const roomRoutes = async (server: FastifyInstance) => {
         );
 
         if (!characterBelongsToPlayer || !isNameUnique) {
-          console.log("results ",characterBelongsToPlayer, isNameUnique)
           return reply.status(403).send({
             error: `Character can't enter, server returned ${
               (characterBelongsToPlayer &&
@@ -172,11 +169,15 @@ export const roomRoutes = async (server: FastifyInstance) => {
           });
         }
 
-        await inGameDatabase.enterRoom(player_id, room_id, character_id);
+        const roomStatus = await inGameDatabase.enterRoom(
+          player_id,
+          room_id,
+          character_id
+        );
 
         return reply
           .status(201)
-          .send({ created: "Player has entered the room." });
+          .send({ created: `Player has entered the room: ${roomStatus}` });
       } catch (error) {
         console.error("Error at entering this room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });

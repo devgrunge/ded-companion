@@ -61,6 +61,7 @@ export class InGameModel {
     const roomsCollection = db.collection("Rooms");
 
     try {
+      console.log("updatedd data",updatedData)
       const result = await roomsCollection.findOneAndUpdate(
         { room_id: roomId },
         { $set: updatedData },
@@ -151,22 +152,23 @@ export class InGameModel {
         (player: any) => player.id === playerId
       );
 
-      if (existingPlayerIndex !== -1) {
-        room.players[existingPlayerIndex].character = character;
-      } else {
-        room.players.push({
-          id: playerId,
-          character: character,
-        });
-      }
+      console.log("Players in room===>", room.players);
+      // if (existingPlayerIndex !== -1) {
+      //   room.players[existingPlayerIndex].character = character;
+      // } else {
+      const updateRoomNew = await room.players.push({
+        id: playerId,
+        character: [...room.players, character],
+      });
 
+      console.log("updated room ===>", updateRoomNew);
       const updatedRoom = await roomsCollection.findOneAndUpdate(
         { room_id: roomId },
         { $set: { players: room.players } },
         { returnDocument: "after" }
       );
 
-      return updatedRoom?.value;
+      return updateRoomNew;
     } catch (error) {
       throw error;
     }

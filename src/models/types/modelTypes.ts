@@ -1,4 +1,4 @@
-import { ObjectId, WithId } from "mongodb";
+import { ObjectId } from "mongodb";
 
 export interface Character {
   id: string;
