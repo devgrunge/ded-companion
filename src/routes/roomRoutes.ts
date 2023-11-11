@@ -58,15 +58,12 @@ export const roomRoutes = async (server: FastifyInstance) => {
       try {
         const room = await inGameDatabase.getRoomByInviteCode(inviteCode);
 
-        console.log(room);
         if (!room) {
           reply.status(404).send({ error: "Room not found" });
           return;
         }
 
-        return reply
-          .status(200)
-          .send({ success: `Room found, Welcome to ${room.room_name}` });
+        return reply.status(200).send({ success: room } as any);
       } catch (error) {
         console.error("Error getting room:", error);
         reply.status(500).send({ error: "Internal server error" });

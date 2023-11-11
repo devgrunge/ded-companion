@@ -1,7 +1,6 @@
 import { FastifyReply } from "fastify/types/reply";
 import { FastifyRequest } from "fastify/types/request";
 import { WithId } from "mongodb";
-import { Player } from "../../models/types/modelTypes";
 
 export interface IQuerystring {
   username: string;
@@ -64,7 +63,7 @@ export interface CharacterParams {
 }
 
 export interface IReply {
-  200: { success: boolean | void | string };
+  200: { success: boolean | void | string};
   201: { created: string | WithId<Document> };
   204: { updated: string };
   302: { url: string };
