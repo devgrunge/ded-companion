@@ -1,9 +1,14 @@
 import { randomUUID } from "crypto";
 import { mongoClient } from "../config/db.ts";
-import { RoomData } from "../routes/types/routeTypes.js";
+import { PlayerParams, RoomData } from "../routes/types/routeTypes.js";
 import { CharacterModel } from "./characterModel.js";
 import { nanoid } from "nanoid";
-import { Character, Player, RoomsModel } from "./types/modelTypes.ts";
+import {
+  Character,
+  Player,
+  PlayersModel,
+  RoomsModel,
+} from "./types/modelTypes.ts";
 import { Collection, Filter, WithId } from "mongodb";
 
 const characterDatabase = new CharacterModel();
@@ -56,6 +61,7 @@ export class InGameModel {
     const roomsCollection = db.collection("Rooms");
 
     try {
+      console.log("updatedd data", updatedData);
       const result = await roomsCollection.findOneAndUpdate(
         { room_id: roomId },
         { $set: updatedData },
@@ -87,7 +93,6 @@ export class InGameModel {
       const room = await roomsCollection.findOne({
         room_id: roomId,
       });
-      console.log("room search result ===> ", room);
 
       return room;
     } catch (error) {
@@ -96,13 +101,12 @@ export class InGameModel {
   }
 
   async characterBelongsToPlayer(
-    playerId: string | undefined,
-    characterId: string | undefined
+    playerId: string | unknown,
+    characterId: string | unknown
   ) {
-    const db = mongoClient.db("dndcompanion");
-    const playersCollection = db.collection("Players");
-
     try {
+      const db = mongoClient.db("dndcompanion");
+      const playersCollection = db.collection("Players");
       const player = await playersCollection.findOne({ id: playerId });
 
       if (!player || !player.characters) {
@@ -112,6 +116,7 @@ export class InGameModel {
       const character = player.characters.find(
         (char: any) => char.id === characterId
       );
+
       return character !== undefined;
     } catch (error) {
       throw error;
@@ -136,7 +141,6 @@ export class InGameModel {
         throw new Error("Character not found.");
       }
 
-      // Fetch the room and its players
       const room = await roomsCollection.findOne({ room_id: roomId });
 
       if (!room) {
@@ -147,22 +151,13 @@ export class InGameModel {
         (player: any) => player.id === playerId
       );
 
-      if (existingPlayerIndex !== -1) {
-        room.players[existingPlayerIndex].character = character;
-      } else {
-        room.players.push({
-          id: playerId,
-          character: character,
-        });
-      }
-
       const updatedRoom = await roomsCollection.findOneAndUpdate(
         { room_id: roomId },
         { $set: { players: room.players } },
         { returnDocument: "after" }
       );
 
-      return updatedRoom?.value;
+      return updatedRoom;
     } catch (error) {
       throw error;
     }

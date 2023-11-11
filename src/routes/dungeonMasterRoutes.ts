@@ -42,6 +42,8 @@ export const dungeonMasterRoutes = async (server: FastifyInstance) => {
           return reply.status(404).send({ error: "Room not found" });
         }
 
+        
+
         const enterRoom = database.enterRoom(body);
         if (!enterRoom) {
           reply.status(400).send({ error: "Internal server error" });
