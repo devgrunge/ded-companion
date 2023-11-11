@@ -61,7 +61,7 @@ export class InGameModel {
     const roomsCollection = db.collection("Rooms");
 
     try {
-      console.log("updatedd data",updatedData)
+      console.log("updatedd data", updatedData);
       const result = await roomsCollection.findOneAndUpdate(
         { room_id: roomId },
         { $set: updatedData },
@@ -141,7 +141,6 @@ export class InGameModel {
         throw new Error("Character not found.");
       }
 
-      // Fetch the room and its players
       const room = await roomsCollection.findOne({ room_id: roomId });
 
       if (!room) {
@@ -152,23 +151,13 @@ export class InGameModel {
         (player: any) => player.id === playerId
       );
 
-      console.log("Players in room===>", room.players);
-      // if (existingPlayerIndex !== -1) {
-      //   room.players[existingPlayerIndex].character = character;
-      // } else {
-      const updateRoomNew = await room.players.push({
-        id: playerId,
-        character: [...room.players, character],
-      });
-
-      console.log("updated room ===>", updateRoomNew);
       const updatedRoom = await roomsCollection.findOneAndUpdate(
         { room_id: roomId },
         { $set: { players: room.players } },
         { returnDocument: "after" }
       );
 
-      return updateRoomNew;
+      return updatedRoom;
     } catch (error) {
       throw error;
     }

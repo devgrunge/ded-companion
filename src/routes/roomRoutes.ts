@@ -177,7 +177,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
 
         return reply
           .status(201)
-          .send({ created: `Player has entered the room: ${roomStatus}` });
+          .send({ created: "Player has entered the room" });
       } catch (error) {
         console.error("Error at entering this room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });
