@@ -16,7 +16,7 @@ import {
 const database = new DmModel();
 const inGameDatabase = new InGameModel();
 
-export const dungeonMasterRoutes = async (server: FastifyInstance) => {
+const dungeonMasterRoutes = async (server: FastifyInstance) => {
   server.post<RouteInterface>(
     "/dm/enter",
     {
@@ -41,8 +41,6 @@ export const dungeonMasterRoutes = async (server: FastifyInstance) => {
         if (!roomExists) {
           return reply.status(404).send({ error: "Room not found" });
         }
-
-        
 
         const enterRoom = database.enterRoom(body);
         if (!enterRoom) {
@@ -140,3 +138,5 @@ export const dungeonMasterRoutes = async (server: FastifyInstance) => {
     }
   );
 };
+
+export default dungeonMasterRoutes;

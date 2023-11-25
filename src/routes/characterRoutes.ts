@@ -3,17 +3,14 @@ import { CharacterModel } from "../models/characterModel.ts";
 import { validateToken } from "../services/auth.ts";
 import { randomUUID } from "node:crypto";
 import { mongoClient } from "../config/db.ts";
-import {
-  CharacterParams,
-  RouteInterface,
-} from "./types/routeTypes.ts";
+import { CharacterParams, RouteInterface } from "./types/routeTypes.ts";
 import { FastifyReply } from "fastify/types/reply.ts";
 import { FastifyRequest } from "fastify";
 import { CharacterData } from "../models/types/modelTypes.ts";
 
 const database = new CharacterModel();
 
-export const characterRoutes = async (server: FastifyInstance) => {
+const characterRoutes = async (server: FastifyInstance) => {
   server.post<RouteInterface>(
     "/characters",
     {
@@ -22,7 +19,7 @@ export const characterRoutes = async (server: FastifyInstance) => {
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const body: CharacterData = request.body as CharacterData;
-        console.log("body ==>",body)
+        console.log("body ==>", body);
         const dataId = randomUUID();
         const characterData: CharacterData = {
           id: dataId,
@@ -41,8 +38,8 @@ export const characterRoutes = async (server: FastifyInstance) => {
           armor_class: body.armor_class,
           initiative: 0,
         };
-        console.log("character data ==>",characterData)
-        
+        console.log("character data ==>", characterData);
+
         const ownerEmail = request.headers["user-email"] as string;
 
         const updatedPlayer = await database.create(ownerEmail, characterData);
@@ -166,3 +163,5 @@ export const characterRoutes = async (server: FastifyInstance) => {
     }
   );
 };
+
+export default characterRoutes;

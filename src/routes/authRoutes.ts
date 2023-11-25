@@ -10,7 +10,7 @@ import {
 
 const database = new LoginModel();
 
-export const authRoutes = async (server: FastifyInstance) => {
+ const authRoutes = async (server: FastifyInstance) => {
   server.get<RouteInterface>("/", async (request, reply) => {
     try {
       reply
@@ -135,3 +135,5 @@ export const authRoutes = async (server: FastifyInstance) => {
     }
   );
 };
+
+export default authRoutes;
