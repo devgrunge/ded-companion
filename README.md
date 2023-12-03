@@ -1,32 +1,29 @@
-### Create characters
-POST https://ded-companion.onrender.com/characters
-Content-Type: application/json
+# ded-companion
 
-{
-    "name": "veteran",
-    "level": 3,
-    "class": "warrior"
-}
+## Introduction
 
-### List characters
-GET https://ded-companion.onrender.com/characters
+This is a board game assistant, Node.Js with Fastify
 
-### Search usign Quey parameters
+## Getting Started
 
-GET https://ded-companion.onrender.com/characters?search=newbie
+### Prerequisites
 
-### Update Character
+Make sure you have the following installed:
 
-PUT https://ded-companion.onrender.com/characters/163b51b6-741e-4222-bce7-2b67a1d74f5f
-Content-Type: application/json
+- Node.js
+- TypeScript
 
-{
-  "name": "Veteran",
-  "level": 3,
-  "class": "Warrior"
-}
+### Installing
 
-### Delete Character
+1. Clone the repository:
 
-DELETE https://ded-companion.onrender.com/characters/163b51b6-741e-4222-bce7-2b67a1d74f5f
+ ```bash
+   git clone https://github.com/devgrunge/ded-companion.git
+   ```
+ ### Running
+ 1. Run this script on terminal: 
 
+   ```bash
+     npm run dev
+   ```
+   
