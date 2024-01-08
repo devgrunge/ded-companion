@@ -1,14 +1,16 @@
-import { fastify } from "fastify";
-import { characterRoutes } from "../routes/characterRoutes.ts";
-import { roomRoutes } from "../routes/roomRoutes.js";
-import { dungeonMasterRoutes } from "../routes/dungeonMasterRoutes.ts";
-import { authRoutes } from "../routes/authRoutes.ts";
+import { FastifyPluginCallback, fastify } from "fastify";
+import { registerRoutes } from "../controllers/routesController.ts";
+import fastifyCors from "@fastify/cors";
 import "dotenv/config";
 
 const server = fastify();
-authRoutes(server);
-characterRoutes(server);
-roomRoutes(server);
-dungeonMasterRoutes(server);
+
+server.register(fastifyCors, {
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type"],
+});
+
+registerRoutes(server);
 
 export { server };

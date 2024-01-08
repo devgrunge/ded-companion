@@ -1,7 +1,6 @@
 import { FastifyReply } from "fastify/types/reply";
 import { FastifyRequest } from "fastify/types/request";
 import { WithId } from "mongodb";
-import { Player } from "../../models/types/modelTypes";
 
 export interface IQuerystring {
   username: string;
@@ -17,7 +16,7 @@ export interface PlayerParams {
   name?: string;
   email?: string;
   password?: string;
-  characters?: [];
+  characters?: CharacterData[];
   isDm?: boolean;
 }
 
@@ -64,7 +63,7 @@ export interface CharacterParams {
 }
 
 export interface IReply {
-  200: { success: boolean | void | string };
+  200: { success: boolean | void | string};
   201: { created: string | WithId<Document> };
   204: { updated: string };
   302: { url: string };
@@ -81,39 +80,12 @@ export interface DmParams {
 }
 
 export interface RoomData {
+  params?: string;
+  player_id?: string | undefined;
   room_id?: string;
   room_name: string;
   inviteCode?: string;
   players?: [];
   character_id?: string;
-  entity_id?: string | undefined;
   owner?: string;
-  params?: string;
-}
-
-export interface CharacterData {
-  id: string;
-  name: string;
-  level?: number;
-  class?: string;
-  attributes: {
-    str?: number;
-    dex?: number;
-    con?: number;
-    int?: number;
-    wis?: number;
-    car?: number;
-  };
-  hitpoints?: number;
-  armor_class?: number;
-  initiative?: number;
-  owner?: string;
-  isDm?: boolean;
-}
-
-
-export interface UpdatePlayersRequestBody {
-  playerIds: string[];
-  updatedData: Partial<Player>;
-  roomId: string | unknown;
 }

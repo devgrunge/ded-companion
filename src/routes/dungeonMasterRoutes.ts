@@ -5,16 +5,18 @@ import {
   DungeonMasterRequest,
   RoomData,
   RouteInterface,
-  UpdatePlayersRequestBody,
 } from "./types/routeTypes.ts";
 import { DmModel } from "../models/dmModel.ts";
 import { InGameModel } from "../models/inGameModel.ts";
-import { Player } from "../models/types/modelTypes.ts";
+import {
+  Player,
+  UpdatePlayersRequestBody,
+} from "../models/types/modelTypes.ts";
 
 const database = new DmModel();
 const inGameDatabase = new InGameModel();
 
-export const dungeonMasterRoutes = async (server: FastifyInstance) => {
+const dungeonMasterRoutes = async (server: FastifyInstance) => {
   server.post<RouteInterface>(
     "/dm/enter",
     {
@@ -116,19 +118,19 @@ export const dungeonMasterRoutes = async (server: FastifyInstance) => {
       try {
         const body = request.body as UpdatePlayersRequestBody;
         const roomId = (request as unknown as DungeonMasterRequest).params
-          ?.roomId;
+          ?.roomId as string;
 
-        const { playerIds, updatedData } = body;
+        const { playerName, updatedData } = body;
 
-        const result = await inGameDatabase.updatePlayersData(
+        const result = await inGameDatabase.updateCharacterData(
           roomId,
-          playerIds,
+          playerName,
           updatedData
         );
 
         return reply
           .status(200)
-          .send({ success: `Updated ${result.modifiedCount} players` });
+          .send({ success: `Character updated, ${result.name}` });
       } catch (error) {
         console.error("Internal server error", error);
         return reply.status(500).send({ error: "Internal server error" });
@@ -136,3 +138,5 @@ export const dungeonMasterRoutes = async (server: FastifyInstance) => {
     }
   );
 };
+
+export default dungeonMasterRoutes;

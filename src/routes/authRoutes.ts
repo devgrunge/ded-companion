@@ -10,7 +10,7 @@ import {
 
 const database = new LoginModel();
 
-export const authRoutes = async (server: FastifyInstance) => {
+ const authRoutes = async (server: FastifyInstance) => {
   server.get<RouteInterface>("/", async (request, reply) => {
     try {
       reply
@@ -37,7 +37,7 @@ export const authRoutes = async (server: FastifyInstance) => {
 
         const userExists = await database.getUserInfo(email);
 
-        if (userExists !== null && userExists.length > 0) {
+        if (userExists !== null) {
           return reply
             .status(400)
             .send({ error: "User email already registered" });
@@ -135,3 +135,5 @@ export const authRoutes = async (server: FastifyInstance) => {
     }
   );
 };
+
+export default authRoutes;

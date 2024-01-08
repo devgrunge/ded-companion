@@ -1,12 +1,14 @@
-import { FastifyInstance } from "fastify/types/instance.js";
-import { InGameModel } from "../models/inGameModel.js";
-import { validateToken } from "../services/auth.js";
-import { RoomData, RoomRequest, RouteInterface } from "./types/routeTypes.js";
+import { FastifyInstance } from "fastify/types/instance.ts";
+import { InGameModel } from "../models/inGameModel.ts";
+import { validateToken } from "../services/auth.ts";
+import { RoomData, RoomRequest, RouteInterface } from "./types/routeTypes.ts";
 import { FastifyRequest, FastifyReply } from "fastify";
+import { Utils } from "../utils/index.ts";
 
+const validation = new Utils();
 const inGameDatabase = new InGameModel();
 
-export const roomRoutes = async (server: FastifyInstance) => {
+const roomRoutes = async (server: FastifyInstance) => {
   server.post<RouteInterface>(
     "/rooms",
     {
@@ -61,7 +63,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
           return;
         }
 
-        return reply.status(200).send({ success: "Room found" });
+        return reply.status(200).send({ success: room } as FastifyReply | any);
       } catch (error) {
         console.error("Error getting room:", error);
         reply.status(500).send({ error: "Internal server error" });
@@ -83,8 +85,6 @@ export const roomRoutes = async (server: FastifyInstance) => {
         const updatedRoom = await inGameDatabase.updateRoom(roomId, {
           room_name: body.room_name,
         });
-
-        console.log("updated room", updatedRoom);
 
         if (!updatedRoom) {
           reply.status(404).send({ error: "Room not found" });
@@ -130,9 +130,9 @@ export const roomRoutes = async (server: FastifyInstance) => {
     {
       preHandler: [validateToken],
     },
-    async (request: FastifyRequest, reply: FastifyReply) => {
+    async (request, reply) => {
       try {
-        const { entity_id, room_id, character_id } = request.body as RoomData;
+        const { player_id, room_id, character_id } = request.body as RoomData;
         const currentUserEmail = request.headers["user-email"] as string;
 
         const roomExists = await inGameDatabase.roomExists(
@@ -145,21 +145,36 @@ export const roomRoutes = async (server: FastifyInstance) => {
 
         const characterBelongsToPlayer =
           await inGameDatabase.characterBelongsToPlayer(
-            entity_id,
+            player_id,
             character_id
           );
 
-        if (!characterBelongsToPlayer) {
-          return reply
-            .status(403)
-            .send({ error: "Character doesn't belong to the player" });
+        const playerNames = await validation.getUserNames(room_id);
+
+        const isNameUnique = await validation.validatePlayerNamesInRoom(
+          room_id,
+          playerNames
+        );
+
+        if (!characterBelongsToPlayer || !isNameUnique) {
+          return reply.status(403).send({
+            error: `Character can't enter, server returned ${
+              (characterBelongsToPlayer &&
+                "Character don't belongs to player") ||
+              (isNameUnique && "Player with the same name in room")
+            }`,
+          });
         }
 
-        await inGameDatabase.enterRoom(entity_id, room_id, character_id);
+        const roomStatus = await inGameDatabase.enterRoom(
+          player_id,
+          room_id,
+          character_id
+        );
 
         return reply
           .status(201)
-          .send({ created: "Player has entered the room." });
+          .send({ created: "Player has entered the room" });
       } catch (error) {
         console.error("Error at entering this room: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });
@@ -214,3 +229,5 @@ export const roomRoutes = async (server: FastifyInstance) => {
     }
   );
 };
+
+export default roomRoutes;
