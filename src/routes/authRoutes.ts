@@ -37,7 +37,7 @@ const database = new LoginModel();
 
         const userExists = await database.getUserInfo(email);
 
-        if (userExists !== null && userExists.length > 0) {
+        if (userExists !== null) {
           return reply
             .status(400)
             .send({ error: "User email already registered" });

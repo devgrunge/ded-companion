@@ -9,4 +9,5 @@ export const registerRoutes = async (server: FastifyInstance) => {
   roomRoutes(server);
   characterRoutes(server);
   dungeonMasterRoutes(server);
+  // todo: automate route registering
 };

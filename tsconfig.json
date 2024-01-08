@@ -10,7 +10,7 @@
     }
   },
   "compilerOptions": {
-    "module": "ESNext",
+    "module": "esnext",
     "moduleResolution": "Node",
     "lib": [
       "DOM",

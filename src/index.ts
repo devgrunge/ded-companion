@@ -1,7 +1,5 @@
 import { server } from "./server/server.ts";
-import cors from "@fastify/cors";
 
-server.register(cors);
 
 server.listen({ port: 3338 }, (err, address) => {
   if (err) {
