@@ -8,7 +8,7 @@ import { Utils } from "../utils/index.ts";
 const validation = new Utils();
 const inGameDatabase = new InGameModel();
 
-export const roomRoutes = async (server: FastifyInstance) => {
+const roomRoutes = async (server: FastifyInstance) => {
   server.post<RouteInterface>(
     "/rooms",
     {
@@ -63,7 +63,7 @@ export const roomRoutes = async (server: FastifyInstance) => {
           return;
         }
 
-        return reply.status(200).send({ success: room } as any);
+        return reply.status(200).send({ success: room } as FastifyReply | any);
       } catch (error) {
         console.error("Error getting room:", error);
         reply.status(500).send({ error: "Internal server error" });
@@ -229,3 +229,5 @@ export const roomRoutes = async (server: FastifyInstance) => {
     }
   );
 };
+
+export default roomRoutes;
