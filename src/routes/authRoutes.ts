@@ -10,7 +10,7 @@ import {
 
 const database = new LoginModel();
 
- const authRoutes = async (server: FastifyInstance) => {
+const authRoutes = async (server: FastifyInstance) => {
   server.get<RouteInterface>("/", async (request, reply) => {
     try {
       reply
@@ -44,9 +44,9 @@ const database = new LoginModel();
         }
         playerData.password = bcrypt.hashSync(password, 10);
 
-        await database.createAccount(playerData);
+        const player = await database.createAccount(playerData);
 
-        return reply.status(201).send({ success: "Sucess creating player" });
+        return reply.status(201).send({ success: player });
       } catch (error) {
         console.log("Error creating new user: ", error);
         return reply.status(500).send({ error: "Internal Server Error" });
@@ -97,7 +97,12 @@ const database = new LoginModel();
           return reply.status(400).send({ errror: "User do not exists" });
         }
 
-        const updatedUser = await database.updateUser(email, password, name, isDm);
+        const updatedUser = await database.updateUser(
+          email,
+          password,
+          name,
+          isDm
+        );
 
         return reply.status(204).send({ updated: updatedUser });
       } catch (error) {

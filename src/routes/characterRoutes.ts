@@ -7,6 +7,7 @@ import { CharacterParams, RouteInterface } from "./types/routeTypes.ts";
 import { FastifyReply } from "fastify/types/reply.ts";
 import { FastifyRequest } from "fastify";
 import { CharacterData } from "../models/types/modelTypes.ts";
+import { io } from "../index.ts";
 
 const database = new CharacterModel();
 
@@ -63,6 +64,7 @@ const characterRoutes = async (server: FastifyInstance) => {
       if (currentUserEmail) {
         try {
           const characters = await database.list(currentUserEmail);
+          io.emit("charactersUpdated", { characters });
           return reply.send(characters);
         } catch (error) {
           console.error("Error listing characters:", error);

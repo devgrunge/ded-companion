@@ -17,9 +17,11 @@
     "bcrypt": "^5.1.1",
     "fastify": "^4.23.2",
     "fastify-cors": "^6.1.0",
+    "fastify-socket.io": "^5.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.1.0",
-    "nanoid": "^5.0.1"
+    "nanoid": "^5.0.1",
+    "socket.io": "^4.7.4"
   },
   "devDependencies": {
     "@fastify/jwt": "^7.2.2",
