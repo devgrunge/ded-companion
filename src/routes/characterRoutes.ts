@@ -7,7 +7,7 @@ import { CharacterParams, RouteInterface } from "./types/routeTypes.ts";
 import { FastifyReply } from "fastify/types/reply.ts";
 import { FastifyRequest } from "fastify";
 import { CharacterData } from "../models/types/modelTypes.ts";
-import { io } from "../index.ts";
+import { io } from "../server/server.ts";
 
 const database = new CharacterModel();
 
@@ -64,8 +64,8 @@ const characterRoutes = async (server: FastifyInstance) => {
       if (currentUserEmail) {
         try {
           const characters = await database.list(currentUserEmail);
-          io.emit("charactersUpdated", { characters });
-          return reply.send(characters);
+          io.emit("receive_character_data", characters);
+          return reply.status(201).send(characters);
         } catch (error) {
           console.error("Error listing characters:", error);
           reply.status(500).send({ error: "Internal server error" });
