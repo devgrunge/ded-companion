@@ -1,11 +1,12 @@
 import { mongoClient } from "../config/db.js";
 import { LoginModel } from "./loginModel.js";
 import { CharacterData } from "./types/modelTypes.js";
+import { server } from "../server/server.js";
 
 const database = new LoginModel();
 
 export class CharacterModel {
-  async list(ownerEmail: string) {
+  async list(ownerEmail: string, source: "socket" | "http" = "http") {
     try {
       await mongoClient.connect();
       const db = mongoClient.db("dndcompanion");

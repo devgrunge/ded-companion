@@ -1,31 +1,31 @@
 import { fastify } from "fastify";
 import { registerRoutes } from "../controllers/routesController.ts";
-import fastifyCors from "@fastify/cors";
-import fastifySocketIO from "fastify-socket.io";
-import { createServer } from "node:http";
 import { Server } from "socket.io";
+import fastifyCors from "@fastify/cors";
+import fastifySocketIO from "../websockets/index.ts";
 import "dotenv/config";
 
 const server = fastify();
 
-const httpServer = createServer();
-const io = new Server(httpServer, {
+ server.register(fastifySocketIO, {
   cors: {
-    origin: "*",
-  },
+    origin: '*'
+  }
 });
+
 server.register(fastifyCors, {
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "authorization"],
 });
 
-server.register(fastifySocketIO, {
-  cors: {
-    origin: "*",
-  },
-});
-
 registerRoutes(server);
 
-export { server, io, httpServer };
+declare module "fastify" {
+  interface FastifyInstance {
+    io: Server<{ method: string }>;
+  }
+}
+
+
+export { server };

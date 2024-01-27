@@ -7,7 +7,6 @@ import { CharacterParams, RouteInterface } from "./types/routeTypes.ts";
 import { FastifyReply } from "fastify/types/reply.ts";
 import { FastifyRequest } from "fastify";
 import { CharacterData } from "../models/types/modelTypes.ts";
-import { io } from "../server/server.ts";
 
 const database = new CharacterModel();
 
@@ -20,7 +19,6 @@ const characterRoutes = async (server: FastifyInstance) => {
     async (request: FastifyRequest, reply: FastifyReply) => {
       try {
         const body: CharacterData = request.body as CharacterData;
-        console.log("body ==>", body);
         const dataId = randomUUID();
         const characterData: CharacterData = {
           id: dataId,
@@ -39,7 +37,6 @@ const characterRoutes = async (server: FastifyInstance) => {
           armor_class: body.armor_class,
           initiative: 0,
         };
-        console.log("character data ==>", characterData);
 
         const ownerEmail = request.headers["user-email"] as string;
 
@@ -60,18 +57,17 @@ const characterRoutes = async (server: FastifyInstance) => {
     },
     async (request, reply) => {
       const currentUserEmail = request.headers["user-email"] as string;
-
-      if (currentUserEmail) {
-        try {
+      try {
+        if (currentUserEmail) {
           const characters = await database.list(currentUserEmail);
-          io.emit("receive_character_data", characters);
+
           return reply.status(201).send(characters);
-        } catch (error) {
-          console.error("Error listing characters:", error);
-          reply.status(500).send({ error: "Internal server error" });
+        } else {
+          throw new Error("Unauthorized");
         }
-      } else {
-        reply.status(401).send({ error: "Unauthorized" });
+      } catch (error) {
+        console.error("Error listing characters:", error);
+        reply.status(500).send({ error: `Internal server error ${error}` });
       }
     }
   );
