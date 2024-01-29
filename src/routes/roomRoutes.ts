@@ -2,7 +2,7 @@ import { FastifyInstance } from "fastify/types/instance.ts";
 import { InGameModel } from "../models/inGameModel.ts";
 import { validateToken } from "../services/auth.ts";
 import { RoomData, RoomRequest, RouteInterface } from "./types/routeTypes.ts";
-import { FastifyRequest, FastifyReply } from "fastify";
+import { FastifyReply } from "fastify";
 import { Utils } from "../utils/index.ts";
 
 const validation = new Utils();

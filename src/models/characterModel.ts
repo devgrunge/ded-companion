@@ -1,7 +1,6 @@
 import { mongoClient } from "../config/db.js";
 import { LoginModel } from "./loginModel.js";
 import { CharacterData } from "./types/modelTypes.js";
-import { server } from "../server/server.js";
 
 const database = new LoginModel();
 
