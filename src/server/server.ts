@@ -1,16 +1,14 @@
 import { fastify } from "fastify";
 import { registerRoutes } from "../controllers/routesController.ts";
-import { Server } from "socket.io";
 import fastifyCors from "@fastify/cors";
-import fastifySocketIO from "../websockets/index.ts";
 import "dotenv/config";
 
 const server = fastify();
 
- server.register(fastifySocketIO, {
+server.register(require("fastify-websocket"), {
   cors: {
-    origin: '*'
-  }
+    origin: "*",
+  },
 });
 
 server.register(fastifyCors, {
@@ -20,12 +18,4 @@ server.register(fastifyCors, {
 });
 
 registerRoutes(server);
-
-declare module "fastify" {
-  interface FastifyInstance {
-    io: Server<{ method: string }>;
-  }
-}
-
-
 export { server };

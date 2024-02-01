@@ -15,22 +15,30 @@ server.ready((err) => {
       console.log(`Received user email ${userEmail} for socket ${socket.id}`);
       socketUserMap[socket.id] = userEmail;
 
-      const database = mongoClient.db("dndcompanion");
-      const players = database.collection("Players");
-      const changeStream = players.watch();
+      // const database = mongoClient.db("dndcompanion");
+      // const players = database.collection("Players");
+      // const changeStream = players.watch();
+      mongoClient.connect().then(() => {
+        const database = mongoClient.db("dndcompanion");
+        const players = database.collection("Players");
+        const changeStream = players.watch();
 
-      changeStream.on("change", async (next) => {
-        if (next.fullDocument && next.fullDocument.userEmail) {
-          const userObject = await playerData.list(next.fullDocument.userEmail);
-          console.log('usr obj ==> ',userObject)
-          server.io.to(socket.id).emit("user_updated", userObject);
-        }
-      });
+        // Rest of your changeStream setup code
+        changeStream.on("change", async (next) => {
+          if (next.fullDocument && next.fullDocument.userEmail) {
+            const userObject = await playerData.list(
+              next.fullDocument.userEmail
+            );
+            console.log("usr obj ==> ", userObject);
+            server.io.to(socket.id).emit("user_updated", userObject);
+          }
+        });
 
-      socket.on("disconnect", () => {
-        console.info(`Socket disconnected! ${socket.id}`);
-        changeStream.close();
-        delete socketUserMap[socket.id];
+        socket.on("disconnect", () => {
+          console.info(`Socket disconnected! ${socket.id}`);
+          changeStream.close();
+          delete socketUserMap[socket.id];
+        });
       });
     });
   });
