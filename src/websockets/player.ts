@@ -9,8 +9,12 @@ export const websocketControler = (server: FastifyInstance) => {
   });
 
   server.get("/hello-ws", { websocket: true }, (connection, req) => {
+    console.log("Client connected");
     connection.socket.on("message", (message) => {
-      connection.socket.send("Hello Fastify WebSockets");
+      console.log(`Client message: ${message}`);
+    });
+    connection.socket.on("close", () => {
+      console.log("Client disconnected");
     });
   });
 };
