@@ -1,15 +1,14 @@
 import { fastify } from "fastify";
-import { registerRoutes } from "../controllers/routesController.ts";
+import { routesController } from "../controllers/routesController.ts";
+import websocket from "@fastify/websocket";
 import fastifyCors from "@fastify/cors";
+
 import "dotenv/config";
+import { websocketControler } from "../websockets/player.ts";
 
 const server = fastify();
 
-server.register(require("fastify-websocket"), {
-  cors: {
-    origin: "*",
-  },
-});
+server.register(websocket);
 
 server.register(fastifyCors, {
   origin: "*",
@@ -17,5 +16,6 @@ server.register(fastifyCors, {
   allowedHeaders: ["Content-Type", "authorization"],
 });
 
-registerRoutes(server);
+websocketControler(server);
+routesController(server);
 export { server };

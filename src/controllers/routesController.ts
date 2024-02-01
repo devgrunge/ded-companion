@@ -4,7 +4,7 @@ import roomRoutes from "../routes/roomRoutes.ts";
 import characterRoutes from "../routes/characterRoutes.ts";
 import dungeonMasterRoutes from "../routes/dungeonMasterRoutes.ts";
 
-export const registerRoutes = async (server: FastifyInstance) => {
+export const routesController = async (server: FastifyInstance) => {
   authRoutes(server);
   roomRoutes(server);
   characterRoutes(server);
