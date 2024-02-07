@@ -1,5 +1,3 @@
-import { mongoClient } from "./config/db.ts";
-import { CharacterModel } from "./models/characterModel.ts";
 import { server } from "./server/server.ts";
 
 server.listen({ port: 3338 }, (err, address) => {
