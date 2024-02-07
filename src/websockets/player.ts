@@ -1,6 +1,6 @@
 import { SocketStream } from "@fastify/websocket";
 import { FastifyInstance, FastifyRequest } from "fastify";
-import { Utils } from "../utils";
+import { Utils } from "../utils/index.ts";
 
 export const websocketController = async (server: FastifyInstance) => {
   server.get("/hello", (request, reply) => {
@@ -8,6 +8,7 @@ export const websocketController = async (server: FastifyInstance) => {
       message: "Hello Fastify",
     });
   });
+
   server.route<{
     Querystring: { token?: string };
   }>({
