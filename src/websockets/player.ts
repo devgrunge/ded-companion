@@ -1,4 +1,3 @@
-import { SocketStream } from "@fastify/websocket";
 import { FastifyInstance, FastifyRequest } from "fastify";
 import { Utils } from "../utils";
 
@@ -46,7 +45,7 @@ export const websocketController = async (server: FastifyInstance) => {
         { maxPayload: 1048576 }, // You can customize options here
         async (connection, req) => {
           let timer = setInterval(() => {
-            connection.socket.send(Utils.randomLetter());
+            connection.socket.send("teste");
           }, 1000);
           // Handle WebSocket connection closing
           connection.socket.on("close", () => {
