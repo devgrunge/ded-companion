@@ -15,32 +15,31 @@ const characterDatabase = new CharacterModel();
 
 export class InGameModel {
   async createRoom(dataRequest: RoomData) {
-    try {
-      const db = mongoClient.db("dndcompanion");
-      const roomsCollection = db.collection("Rooms");
+    const db = mongoClient.db("dndcompanion");
+    const roomsCollection = db.collection("Rooms");
 
-      const randomId = randomUUID();
-      const inviteCode = nanoid(4);
-      const room: RoomData = {
-        room_id: randomId,
-        room_name: dataRequest.room_name,
-        inviteCode: inviteCode,
-        players: [],
-        owner: dataRequest.owner,
-      };
+    const randomId = randomUUID();
+    const inviteCode = nanoid(4);
+    const room: RoomData = {
+      room_id: randomId,
+      room_name: dataRequest.room_name,
+      inviteCode: inviteCode,
+      players: [],
+      owner: dataRequest.owner,
+    };
 
-      const result = await roomsCollection.insertOne(room);
+    const result = await roomsCollection.insertOne(room);
 
-      if (result.acknowledged && result.insertedId) {
-        console.log("Room was successfully created:", result.insertedId);
-        return result.insertedId;
-      } else {
-        console.log("Room creation failed.");
-        return null;
-      }
-    } catch (error) {
-      throw error;
+    if (result.acknowledged && result.insertedId) {
+      console.log("Room was successfully created:", result.insertedId);
+      return result.insertedId;
+    } else {
+      console.log("Room creation failed.");
+      return null;
     }
+  }
+  catch(error) {
+    throw error;
   }
 
   async getRoomByInviteCode(inviteCode: string) {
