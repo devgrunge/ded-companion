@@ -1,10 +1,10 @@
 import fastify, { FastifyInstance, FastifyServerOptions } from "fastify";
 import { routesController } from "../controllers/routesController.ts";
+import { websocketController } from "../websockets/player.ts";
 import fastifyCors from "@fastify/cors";
 import fastifyAccepts from "@fastify/accepts";
-import { websocketController } from "../websockets/player.ts";
-import "dotenv/config";
 import fastifySocketIO from "../websockets/index.ts";
+import "dotenv/config";
 
 fastifyCors[Symbol.for("plugin-meta")].fastify = "3.x - 4.x";
 fastifyAccepts[Symbol.for("plugin-meta")].fastify = "3.x - 4.x";
@@ -29,5 +29,4 @@ server.register(fastifyCors, {
 });
 
 routesController(server);
-
 export { server };
