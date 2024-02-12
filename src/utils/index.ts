@@ -1,4 +1,3 @@
-import { WithId } from "mongodb";
 import { mongoClient } from "../config/db.ts";
 import { RoomsModel } from "../models/types/modelTypes.ts";
 import { PlayerParams } from "../routes/types/routeTypes.ts";
