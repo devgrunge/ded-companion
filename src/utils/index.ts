@@ -3,7 +3,7 @@ import { RoomsModel } from "../models/types/modelTypes.ts";
 import { PlayerParams } from "../routes/types/routeTypes.ts";
 
 export class Utils {
-  async getUserNames(roomId: string | undefined | any) {
+  async getUserNames(roomId: string | undefined | unknown) {
     const db = mongoClient.db("dndcompanion");
     const roomsCollection = db.collection("Rooms");
 
@@ -13,10 +13,10 @@ export class Utils {
       throw new Error("Room not found");
     }
 
-    const playerNames: PlayerParams = room.players.map((item: any) => {
+    const playerNames: PlayerParams = room.players.map((item) => {
       item.name;
     });
-    const nameArrays = new Array(playerNames);
+    // const nameArrays = new Array(playerNames);
     return playerNames;
   }
   async validatePlayerNamesInRoom(

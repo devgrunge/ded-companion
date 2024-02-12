@@ -13,16 +13,12 @@ const server: FastifyInstance = fastify({
   logger: true,
 } as FastifyServerOptions);
 
-// const server = fastify(/*{ logger: true }*/);
-
 server.register(fastifySocketIO);
 
 server.ready((err) => {
   if (err) throw err;
 
-  server.io.on("connection", (socket: any) =>
-    console.info("Socket connected!", socket.id)
-  );
+  server.io.on("connection", (socket: any) => websocketController(server));
 });
 
 server.register(fastifyCors, {
@@ -32,6 +28,6 @@ server.register(fastifyCors, {
   credentials: true,
 });
 
-websocketController(server);
 routesController(server);
+
 export { server };
