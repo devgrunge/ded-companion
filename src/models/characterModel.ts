@@ -20,9 +20,8 @@ export class CharacterModel {
       }
     } catch (error) {
       console.error(`Error listing characters (${source}):`, error);
-      throw error;
-    } finally {
       mongoClient.close();
+      throw error;
     }
   }
 
