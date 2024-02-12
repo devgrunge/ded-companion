@@ -19,7 +19,10 @@ export class CharacterModel {
         return [];
       }
     } catch (error) {
+      console.error("Error listing characters:", error);
       throw error;
+    } finally {
+      mongoClient.close();
     }
   }
 
@@ -54,6 +57,8 @@ export class CharacterModel {
     } catch (error) {
       console.error("Error creating character:", error);
       throw error;
+    } finally {
+      mongoClient.close();
     }
   }
 
@@ -102,7 +107,10 @@ export class CharacterModel {
         return false;
       }
     } catch (error) {
+      console.error("Error updating character:", error);
       throw error;
+    } finally {
+      mongoClient.close();
     }
   }
 
@@ -129,7 +137,10 @@ export class CharacterModel {
         return false;
       }
     } catch (error) {
+      console.error("Error deleting character:", error);
       throw error;
+    } finally {
+      mongoClient.close();
     }
   }
 
@@ -143,6 +154,7 @@ export class CharacterModel {
 
       return player;
     } catch (error) {
+      console.error("Error retrieving player data:", error);
       throw error;
     } finally {
       mongoClient.close();
@@ -170,7 +182,10 @@ export class CharacterModel {
 
       return character;
     } catch (error) {
+      console.error("Error fetching character data:", error);
       throw error;
+    } finally {
+      mongoClient.close();
     }
   }
 }

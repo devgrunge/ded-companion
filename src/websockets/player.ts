@@ -2,39 +2,6 @@ import { FastifyInstance, FastifyRequest } from "fastify";
 import { Utils } from "../utils/index.ts";
 
 export const websocketController = async (server: FastifyInstance) => {
-  server.get("/hello", (request, reply) => {
-    reply.send({
-      message: "Hello Fastify",
-    });
-  });
-
-  server.route<{
-    Querystring: { token?: string };
-  }>({
-    method: "GET",
-    url: "/socket",
-    handler: async (request, reply) => {
-      // Establish WebSocket connection
-      reply.websocket(
-        { maxPayload: 1048576 }, // You can customize options here
-        async (connection, req) => {
-          console.log("WebSocket connection initiated");
-          // Listen for incoming messages
-          connection.socket.on("message", (message) => {
-            console.log("WebSocket message received:", message);
-            // Respond to the client with the same message
-            connection.socket.send(message);
-          });
-          // Handle WebSocket connection closing
-          connection.socket.on("close", () => {
-            console.log("WebSocket connection closed");
-          });
-          // Send an initial message to the client after the connection is established
-          connection.socket.send("WebSocket connection established");
-        }
-      );
-    },
-  });
   server.route<{
     Querystring: { token?: string };
   }>({
@@ -45,9 +12,26 @@ export const websocketController = async (server: FastifyInstance) => {
       reply.websocket(
         { maxPayload: 1048576 }, // You can customize options here
         async (connection, req) => {
-          let timer = setInterval(() => {
-            connection.socket.send("teste");
-          }, 1000);
+          // Function to fetch data
+          const fetchData = async () => {
+            try {
+              // Replace this with your actual data retrieval logic
+              const data = await Utils.getData();
+              connection.socket.send(JSON.stringify(data));
+            } catch (error) {
+              console.error("Error fetching data:", error);
+            }
+          };
+
+          // Send an initial message to the client after the connection is established
+          connection.socket.send("WebSocket connection established");
+
+          // Fetch data initially
+          fetchData();
+
+          // Set up interval to fetch and send data every second
+          let timer = setInterval(fetchData, 1000);
+
           // Handle WebSocket connection closing
           connection.socket.on("close", () => {
             clearInterval(timer);
