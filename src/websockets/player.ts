@@ -10,7 +10,6 @@ export const websocketController = (server: FastifyInstance) => {
     socket.on("fetch_character_data", async (email: string) => {
       intervalId = setInterval(async () => {
         const playerData = await database.list(email, "ws");
-        console.info(playerData);
 
         if (playerData.length <= 0) {
           socket.emit("character_data", {
@@ -19,9 +18,8 @@ export const websocketController = (server: FastifyInstance) => {
         } else {
           socket.emit("character_data", { data: playerData });
         }
-      }, 5000); // Fetch data every 5 seconds
+      }, 5000);
 
-      // Initial fetch when the socket connects
       const playerData = await database.list(email, "ws");
       console.info(playerData);
 
@@ -34,7 +32,6 @@ export const websocketController = (server: FastifyInstance) => {
       }
     });
 
-    // Clean up the interval on socket disconnect
     socket.on("disconnect", () => {
       clearInterval(intervalId);
       console.log("Socket disconnected!", socket.id);
