@@ -1,6 +1,7 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import { Server, ServerOptions } from "socket.io";
+import { Character } from "../models/types/modelTypes";
 
 const fastifySocketIO: FastifyPluginAsync<Partial<ServerOptions>> = fp(
   async function (fastify, opts) {
@@ -12,5 +13,14 @@ const fastifySocketIO: FastifyPluginAsync<Partial<ServerOptions>> = fp(
   },
   { fastify: ">=4.x.x", name: "fastify-socket.io" }
 );
+
+export interface FetchCharacterDataRequest {
+  email: string;
+}
+
+export interface CharacterDataResponse {
+  error?: string;
+  data?: Character[];
+}
 
 export default fastifySocketIO;

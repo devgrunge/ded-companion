@@ -2,11 +2,11 @@
 
 ## Introduction
 
-This is a board game assistant, Node.Js with Fastify
+This is a board game assistant, using Node.Js with Fastify and MongoDb
 
 ## Getting Started
 
-### Prerequisites
+### Pre requisites
 
 Make sure you have the following installed:
 
@@ -17,13 +17,21 @@ Make sure you have the following installed:
 
 1. Clone the repository:
 
- ```bash
-   git clone https://github.com/devgrunge/ded-companion.git
-   ```
- ### Running
- 1. Run this script on terminal: 
+```bash
+  git clone https://github.com/devgrunge/ded-companion.git
+```
 
-   ```bash
-     npm run dev
-   ```
-   
+### Running
+
+1.  Run this script on terminal:
+
+```bash
+  npm install
+```
+
+Then
+
+
+```bash
+  npm run dev
+```

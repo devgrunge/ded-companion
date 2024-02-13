@@ -5,7 +5,7 @@ import { CharacterData } from "./types/modelTypes.js";
 const database = new LoginModel();
 
 export class CharacterModel {
-  async list(ownerEmail: string, _source: "socket" | "http" = "http") {
+  async list(ownerEmail: string, source: string = "http") {
     try {
       await mongoClient.connect();
       const db = mongoClient.db("dndcompanion");
@@ -19,10 +19,9 @@ export class CharacterModel {
         return [];
       }
     } catch (error) {
-      console.error("Error listing characters:", error);
-      throw error;
-    } finally {
+      console.error(`Error listing characters (${source}):`, error);
       mongoClient.close();
+      throw error;
     }
   }
 

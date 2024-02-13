@@ -1,13 +1,18 @@
 import fastify, { FastifyInstance, FastifyServerOptions } from "fastify";
 import { routesController } from "../controllers/routesController.ts";
+import { websocketController } from "../websockets/player.ts";
 import fastifyCors from "@fastify/cors";
 import fastifyAccepts from "@fastify/accepts";
-import { websocketController } from "../websockets/player.ts";
-import "dotenv/config";
 import fastifySocketIO from "../websockets/index.ts";
+import "dotenv/config";
+import { EventsController } from "./events/player.ts";
+import FastifySSEPlugin from "fastify-sse-v2";
 
-fastifyCors[Symbol.for("plugin-meta")].fastify = "3.x - 4.x";
-fastifyAccepts[Symbol.for("plugin-meta")].fastify = "3.x - 4.x";
+const corsPlugin: any = fastifyCors;
+const acceptsPlugin: any = fastifyAccepts;
+
+corsPlugin[Symbol.for("plugin-meta")].fastify = "3.x - 4.x";
+acceptsPlugin[Symbol.for("plugin-meta")].fastify = "3.x - 4.x";
 
 const server: FastifyInstance = fastify({
   logger: true,
@@ -18,8 +23,10 @@ server.register(fastifySocketIO);
 server.ready((err) => {
   if (err) throw err;
 
-  server.io.on("connection", (socket: any) => websocketController(server));
+  // server.io.on("connection", () => websocketController(server));
 });
+
+server.register(FastifySSEPlugin);
 
 server.register(fastifyCors, {
   origin: "*",
@@ -28,6 +35,6 @@ server.register(fastifyCors, {
   credentials: true,
 });
 
+EventsController(server);
 routesController(server);
-
 export { server };

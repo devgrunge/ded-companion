@@ -6,14 +6,16 @@ const uri = `mongodb+srv://admingrunge:${dbPassword}@cluster0.1vwytba.mongodb.ne
 
 const mongoClient = new MongoClient(uri);
 
-async function run() {
+export async function connectToDatabase() {
   try {
     await mongoClient.connect();
-  } catch {
-    await mongoClient.close();
+  } catch (error) {
+    throw error;
   }
 }
 
-run().catch(console.dir);
+export function closeDatabaseConnection() {
+  return mongoClient.close();
+}
 
 export { mongoClient };
