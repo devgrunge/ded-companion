@@ -2,10 +2,10 @@ import Jwt, { JwtHeader } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { FastifyReply, FastifyRequest } from "fastify";
 import { VerifiedUser } from "./authTypes.ts";
-import { LoginModel } from "../models/loginModel.ts";
+import { AuthModel } from "../models/auth_model.ts";
 import "dotenv/config";
 
-const database = new LoginModel();
+const database = new AuthModel();
 const appSecret = process.env.PRIVATE_KEY as string;
 
 export const jwtAuth = async (

@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply } from "fastify";
-import { jwtAuth, validateToken } from "../services/auth.ts";
-import { LoginModel } from "../models/loginModel.ts";
+import { jwtAuth, validateToken } from "../middlewares/auth_middleware.ts";
+import { AuthModel } from "../models/auth_model.ts";
 import bcrypt from "bcrypt";
 import {
   PlayerParams,
@@ -8,9 +8,9 @@ import {
   RouteInterface,
 } from "./types/routeTypes.js";
 
-const database = new LoginModel();
+const database = new AuthModel();
 
-const authRoutes = async (server: FastifyInstance) => {
+const AuthController = async (server: FastifyInstance) => {
   server.get<RouteInterface>("/", async (request, reply) => {
     try {
       reply
@@ -141,4 +141,4 @@ const authRoutes = async (server: FastifyInstance) => {
   );
 };
 
-export default authRoutes;
+export default AuthController;

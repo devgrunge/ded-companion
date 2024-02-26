@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify/types/instance.ts";
-import { CharacterModel } from "../models/characterModel.ts";
-import { validateToken } from "../services/auth.ts";
+import { CharacterModel } from "../models/character_model.ts";
+import { validateToken } from "../middlewares/auth_middleware.ts";
 import { randomUUID } from "node:crypto";
 import { mongoClient } from "../config/db.ts";
 import { CharacterParams, RouteInterface } from "./types/routeTypes.ts";
@@ -10,7 +10,7 @@ import { CharacterData } from "../models/types/modelTypes.ts";
 
 const database = new CharacterModel();
 
-const characterRoutes = async (server: FastifyInstance) => {
+const CharacterController = async (server: FastifyInstance) => {
   server.post<RouteInterface>(
     "/characters",
     {
@@ -162,4 +162,4 @@ const characterRoutes = async (server: FastifyInstance) => {
   );
 };
 
-export default characterRoutes;
+export default CharacterController;

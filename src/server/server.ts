@@ -1,11 +1,11 @@
 import fastify, { FastifyInstance, FastifyServerOptions } from "fastify";
-import { routesController } from "../controllers/routesController.ts";
+import { RoutesController } from "../controllers/routes_controller.ts";
 import { websocketController } from "../websockets/player.ts";
 import fastifyCors from "@fastify/cors";
 import fastifyAccepts from "@fastify/accepts";
 import fastifySocketIO from "../websockets/index.ts";
 import "dotenv/config";
-import { EventsController } from "./events/player.ts";
+import { EventsController } from "../events/player.ts";
 import FastifySSEPlugin from "fastify-sse-v2";
 
 const corsPlugin: any = fastifyCors;
@@ -23,7 +23,7 @@ server.register(fastifySocketIO);
 server.ready((err) => {
   if (err) throw err;
 
-  // server.io.on("connection", () => websocketController(server));
+  server.io.on("connection", () => websocketController(server));
 });
 
 server.register(FastifySSEPlugin);
@@ -36,5 +36,5 @@ server.register(fastifyCors, {
 });
 
 EventsController(server);
-routesController(server);
+RoutesController(server);
 export { server };

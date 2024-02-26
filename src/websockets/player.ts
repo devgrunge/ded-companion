@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { CharacterModel } from "../models/characterModel.ts";
+import { CharacterModel } from "../models/character_model.ts";
 
 const database = new CharacterModel();
 
@@ -18,7 +18,7 @@ export const websocketController = (server: FastifyInstance) => {
         } else {
           socket.emit("character_data", { data: playerData });
         }
-      }, 5000);
+      }, 10000);
 
       const playerData = await database.list(email, "ws");
       console.info(playerData);
