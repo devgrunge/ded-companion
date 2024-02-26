@@ -1,8 +1,8 @@
 import { mongoClient } from "../config/db.js";
-import { LoginModel } from "./loginModel.js";
+import { AuthModel } from "./auth_model.ts";
 import { CharacterData } from "./types/modelTypes.js";
 
-const database = new LoginModel();
+const database = new AuthModel();
 
 export class CharacterModel {
   async list(ownerEmail: string, source: string = "http") {

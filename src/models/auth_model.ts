@@ -3,7 +3,7 @@ import { mongoClient } from "../config/db.js";
 import { PlayerParams } from "../routes/types/routeTypes.js";
 import bcrypt from "bcrypt";
 
-export class LoginModel {
+export class AuthModel {
   async createAccount({ email, password, name }: PlayerParams) {
     const dataId = randomUUID();
     const db = mongoClient.db("dndcompanion");

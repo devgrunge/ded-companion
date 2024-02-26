@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify/types/instance.ts";
-import { InGameModel } from "../models/inGameModel.ts";
-import { validateToken } from "../services/auth.ts";
+import { InGameModel } from "../models/ingame_model.ts";
+import { validateToken } from "../middlewares/auth_middleware.ts";
 import { RoomData, RoomRequest, RouteInterface } from "./types/routeTypes.ts";
 import { FastifyReply } from "fastify";
 import { Utils } from "../utils/index.ts";
@@ -8,7 +8,7 @@ import { Utils } from "../utils/index.ts";
 const validation = new Utils();
 const inGameDatabase = new InGameModel();
 
-const roomRoutes = async (server: FastifyInstance) => {
+const RoomController = async (server: FastifyInstance) => {
   server.post<RouteInterface>(
     "/rooms",
     {
@@ -230,4 +230,4 @@ const roomRoutes = async (server: FastifyInstance) => {
   );
 };
 
-export default roomRoutes;
+export default RoomController;

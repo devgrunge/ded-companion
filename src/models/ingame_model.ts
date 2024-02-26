@@ -1,7 +1,7 @@
 import { randomUUID } from "crypto";
 import { mongoClient } from "../config/db.ts";
-import { PlayerParams, RoomData } from "../routes/types/routeTypes.js";
-import { CharacterModel } from "./characterModel.js";
+import { RoomData } from "../routes/types/routeTypes.js";
+import { CharacterModel } from "./character_model.ts";
 import { nanoid } from "nanoid";
 import {
   Character,
@@ -9,7 +9,6 @@ import {
   PlayersModel,
   RoomsModel,
 } from "./types/modelTypes.ts";
-import { Collection, Filter, WithId } from "mongodb";
 
 const characterDatabase = new CharacterModel();
 
@@ -37,9 +36,6 @@ export class InGameModel {
       console.log("Room creation failed.");
       return null;
     }
-  }
-  catch(error) {
-    throw error;
   }
 
   async getRoomByInviteCode(inviteCode: string) {
