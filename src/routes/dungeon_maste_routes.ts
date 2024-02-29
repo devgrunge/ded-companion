@@ -5,18 +5,18 @@ import {
   DungeonMasterRequest,
   RoomData,
   RouteInterface,
-} from "./types/routeTypes.ts";
+} from "./types/route_types.ts";
 import { DmModel } from "../models/dm_model.ts";
 import { InGameModel } from "../models/ingame_model.ts";
 import {
   Player,
   UpdatePlayersRequestBody,
-} from "../models/types/modelTypes.ts";
+} from "../models/types/model_types.ts";
 
 const database = new DmModel();
 const inGameDatabase = new InGameModel();
 
-const DungeonMasterController = async (server: FastifyInstance) => {
+const DungeonMasterRoutes = async (server: FastifyInstance) => {
   server.post<RouteInterface>(
     "/dm/enter",
     {
@@ -139,4 +139,4 @@ const DungeonMasterController = async (server: FastifyInstance) => {
   );
 };
 
-export default DungeonMasterController;
+export default DungeonMasterRoutes;

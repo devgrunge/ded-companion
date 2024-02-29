@@ -1,6 +1,6 @@
-import { mongoClient } from "../config/db.js";
+import { mongoClient } from "../config/db.ts";
 import { AuthModel } from "./auth_model.ts";
-import { CharacterData } from "./types/modelTypes.js";
+import { CharacterData } from "./types/model_types.ts";
 
 const database = new AuthModel();
 

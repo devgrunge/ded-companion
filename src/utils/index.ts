@@ -1,6 +1,6 @@
 import { mongoClient } from "../config/db.ts";
-import { RoomsModel } from "../models/types/modelTypes.ts";
-import { PlayerParams } from "../routes/types/routeTypes.ts";
+import { Character, RoomsModel } from "../models/types/model_types.ts";
+import { PlayerParams } from "../routes/types/route_types.ts";
 
 export class Utils {
   async getUserNames(roomId: string | undefined | unknown) {
@@ -13,7 +13,7 @@ export class Utils {
       throw new Error("Room not found");
     }
 
-    const playerNames: PlayerParams = room.players.map((item) => {
+    const playerNames: PlayerParams = room.players.map((item: Character) => {
       item.name;
     });
     // const nameArrays = new Array(playerNames);

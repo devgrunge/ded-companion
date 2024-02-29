@@ -1,5 +1,5 @@
-import { mongoClient } from "../config/db.js";
-import { DmParams } from "../routes/types/routeTypes.js";
+import { mongoClient } from "../config/db.ts";
+import { DmParams } from "../routes/types/route_types.ts";
 
 export class DmModel {
   async enterRoom(dataRequest: DmParams) {

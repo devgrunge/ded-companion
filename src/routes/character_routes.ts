@@ -3,14 +3,14 @@ import { CharacterModel } from "../models/character_model.ts";
 import { validateToken } from "../middlewares/auth_middleware.ts";
 import { randomUUID } from "node:crypto";
 import { mongoClient } from "../config/db.ts";
-import { CharacterParams, RouteInterface } from "./types/routeTypes.ts";
+import { CharacterParams, RouteInterface } from "./types/route_types.ts";
 import { FastifyReply } from "fastify/types/reply.ts";
 import { FastifyRequest } from "fastify";
-import { CharacterData } from "../models/types/modelTypes.ts";
+import { CharacterData } from "../models/types/model_types.ts";
 
 const database = new CharacterModel();
 
-const CharacterController = async (server: FastifyInstance) => {
+const CharacterRoutes = async (server: FastifyInstance) => {
   server.post<RouteInterface>(
     "/characters",
     {
@@ -162,4 +162,4 @@ const CharacterController = async (server: FastifyInstance) => {
   );
 };
 
-export default CharacterController;
+export default CharacterRoutes;
