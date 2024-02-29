@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { mongoClient } from "../config/db.js";
-import { PlayerParams } from "../routes/types/routeTypes.js";
+import { PlayerParams } from "../routes/types/route_types.ts";
 import bcrypt from "bcrypt";
 
 export class AuthModel {

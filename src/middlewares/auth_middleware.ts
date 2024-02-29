@@ -1,7 +1,7 @@
+import { FastifyReply, FastifyRequest } from "fastify";
 import Jwt, { JwtHeader } from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { VerifiedUser } from "./authTypes.ts";
+import { VerifiedUser } from "./auth_types.ts";
 import { AuthModel } from "../models/auth_model.ts";
 import "dotenv/config";
 

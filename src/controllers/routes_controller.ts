@@ -1,13 +1,13 @@
 import { FastifyInstance } from "fastify";
-import RoomController from "../routes/room_controller.ts";
-import AuthController from "../routes/authRoutes.ts";
-import CharacterController from "../routes/characterRoutes.ts";
-import DungeonMasterController from "../routes/dungeonMasterRoutes.ts";
+import RoomRoutes from "../routes/room_routes.ts";
+import AuthRoutes from "../routes/auth_routes.ts";
+import CharacterRoutes from "../routes/character_routes.ts";
+import DungeonMasterRoutes from "../routes/dungeon_maste_routes.ts";
 
 export const RoutesController = async (server: FastifyInstance) => {
-  AuthController(server);
-  RoomController(server);
-  CharacterController(server);
-  DungeonMasterController(server);
+  AuthRoutes(server);
+  RoomRoutes(server);
+  CharacterRoutes(server);
+  DungeonMasterRoutes(server);
   // todo: automate route registering
 };

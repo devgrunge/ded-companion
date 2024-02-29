@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { mongoClient } from "../config/db.ts";
-import { RoomData } from "../routes/types/routeTypes.js";
+import { RoomData } from "../routes/types/route_types.ts";
 import { CharacterModel } from "./character_model.ts";
 import { nanoid } from "nanoid";
 import {
@@ -8,7 +8,7 @@ import {
   Player,
   PlayersModel,
   RoomsModel,
-} from "./types/modelTypes.ts";
+} from "./types/model_types.ts";
 
 const characterDatabase = new CharacterModel();
 

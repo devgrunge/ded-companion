@@ -6,11 +6,11 @@ import {
   PlayerParams,
   RequestParams,
   RouteInterface,
-} from "./types/routeTypes.js";
+} from "./types/route_types.ts";
 
 const database = new AuthModel();
 
-const AuthController = async (server: FastifyInstance) => {
+const AuthRoutes = async (server: FastifyInstance) => {
   server.get<RouteInterface>("/", async (request, reply) => {
     try {
       reply
@@ -141,4 +141,4 @@ const AuthController = async (server: FastifyInstance) => {
   );
 };
 
-export default AuthController;
+export default AuthRoutes;
