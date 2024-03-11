@@ -1,7 +1,7 @@
 import { FastifyInstance, FastifyPluginAsync } from "fastify";
 import fp from "fastify-plugin";
 import { Server, ServerOptions } from "socket.io";
-import { Character } from "../models/types/modelTypes";
+import { Character } from "../../models/types/model_types.ts";
 
 const fastifySocketIO: FastifyPluginAsync<Partial<ServerOptions>> = fp(
   async function (fastify, opts) {

@@ -1,10 +1,10 @@
 import fastify, { FastifyInstance, FastifyServerOptions } from "fastify";
+import "dotenv/config";
 import { RoutesController } from "../controllers/routes_controller.ts";
-import { websocketController } from "../websockets/player.ts";
+import fastifySocketIO from "../services/websockets/index.ts";
+import { websocketController } from "../services/websockets/player.ts";
 import fastifyCors from "@fastify/cors";
 import fastifyAccepts from "@fastify/accepts";
-import fastifySocketIO from "../websockets/index.ts";
-import "dotenv/config";
 import { EventsController } from "../events/player.ts";
 import FastifySSEPlugin from "fastify-sse-v2";
 
