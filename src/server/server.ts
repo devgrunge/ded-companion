@@ -7,6 +7,7 @@ import fastifyCors from "@fastify/cors";
 import fastifyAccepts from "@fastify/accepts";
 import { EventsController } from "../events/player.ts";
 import FastifySSEPlugin from "fastify-sse-v2";
+import { GptApi } from "../services/gpt-api/index.ts";
 
 const corsPlugin: any = fastifyCors;
 const acceptsPlugin: any = fastifyAccepts;
@@ -37,4 +38,5 @@ server.register(fastifyCors, {
 
 EventsController(server);
 RoutesController(server);
+await GptApi();
 export { server };
