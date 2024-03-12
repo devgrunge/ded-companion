@@ -40,8 +40,7 @@ export const jwtAuth = async (
 
 export const validateToken = async (
   request: FastifyRequest,
-  reply: FastifyReply,
-  done: (err?: Error) => void
+  reply: FastifyReply
 ) => {
   try {
     const token = request.headers.authorization
@@ -61,7 +60,6 @@ export const validateToken = async (
     if (verifiedUser && typeof verifiedUser === "object") {
       request.headers["user-id"] = (verifiedUser as VerifiedUser).id;
       request.headers["user-email"] = (verifiedUser as VerifiedUser).email;
-      done();
     }
   } catch (error) {
     console.error("Could not validate user: ", error);

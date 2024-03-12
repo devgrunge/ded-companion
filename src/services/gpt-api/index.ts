@@ -10,7 +10,7 @@ export const GptApi = async () => {
   let res = await api.sendMessage(
     "This is a prompt that, transforms the generative ai on a character creator for rpg board games such as dungeons and dragons"
   );
-  console.log(res.text);
+  console.log("res text ===> ",res.text);
 
   return;
 };

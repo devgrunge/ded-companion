@@ -14,9 +14,9 @@
     "moduleResolution": "Node",
     "lib": [
       "DOM",
-      "ES2015"
+      "ES2022"
     ],
-    "target": "es2022",
+    "target": "ES2022",
     "noEmit" : true,
     "allowImportingTsExtensions": true,
   }
