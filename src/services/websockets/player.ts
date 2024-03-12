@@ -1,5 +1,5 @@
 import { FastifyInstance } from "fastify";
-import { CharacterModel } from "../models/character_model.ts";
+import { CharacterModel } from "../../models/character_model.ts";
 
 const database = new CharacterModel();
 
